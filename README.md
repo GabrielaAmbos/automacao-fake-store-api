@@ -1,0 +1,1 @@
+# automacao-fake-store-api

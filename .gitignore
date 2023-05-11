@@ -1,0 +1,8 @@
+**/*.mp4
+**/*.png
+.ideia/
+package.json
+package-lock.json
+videos
+screenshots
+.DS_Store

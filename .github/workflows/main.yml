@@ -8,8 +8,7 @@ on:
 
 jobs:
   build:
-
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
 
     steps:
@@ -20,4 +19,4 @@ jobs:
       - name: Install dependencies
 
       - run: npm i
-      - run: npm test
+      - run: npm cypress run

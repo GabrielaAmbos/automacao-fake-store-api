@@ -20,4 +20,4 @@ jobs:
       - name: Install dependencies
 
       - run: npm i
-      - run: npx cypress open
+      - run: npn cypress open

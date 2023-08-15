@@ -1,14 +1,31 @@
 {
   "name": "automacao-fake-store-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "I'm studying about Cypress.",
   "main": "index.js",
+  "homepage": "https://github.com/GabrielaAmbos/cypress#readme",
   "scripts": {
-    "test": "npx cypress open"
+    "cy:open": "npx cypress open",
+    "cy:run": "npx cypress run"
   },
   "author": "Gabriela Ambos",
   "license": "ISC",
-  "dependencies": {
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GabrielaAmbos/cypress.git"
+  },
+  "devDependencies": {
+    "cypress-grep": "^2.5.2",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "joi": "17.2.1",
+    "mocha": "^7.2.0",
+    "mochawesome": "^6.1.1",
+    "mochawesome-report-generator": "^4.1.0",
+    "mongodb": "^3.6.3",
+    "mongoose": "^5.7.5",
+    "node-fetch": "^2.6.1",
+    "npm-run-all": "^4.1.5",
     "cypress": "^9.7.0"
   }
 }

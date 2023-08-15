@@ -30,14 +30,14 @@ Cypress.Commands.add('getProductsSortResult', queryString => {
 Cypress.Commands.add('getAllCategories', () => {
     cy.request({
         method: 'GET',
-        url: '/products/cagories'
+        url: '/products/categories'
     })
 })
 
-Cypress.Commands.add('getSpecifcCategory', queryString => {
+Cypress.Commands.add('getSpecificCategory', queryString => {
     cy.request({
         method: 'GET',
-        url: '/productos/category' + queryString
+        url: '/products/category/' + queryString
     })
 })
 
@@ -49,16 +49,15 @@ Cypress.Commands.add('postAddNewProduct', jsonBody  => {
     })
 })
 
-//Cypress.Commands.add('putUpdateProduct', productId, jsonBody  => {
-//    cy.api({
-//        method : 'PUT',
-//        url: getUrlAllProducts() + '/' + productId,
-//        body: jsonBody
-//    })
-//})
+Cypress.Commands.add('putUpdateProduct', productId  => {
+    cy.request({
+        method : 'PUT',
+        url: 'products/' + productId
+    })
+})
 
 Cypress.Commands.add('deleteProduct', productId  => {
-    cy.api({
+    cy.request({
         method : 'DELETE',
         url: getUrlAllProducts() + '/' + productId
     })

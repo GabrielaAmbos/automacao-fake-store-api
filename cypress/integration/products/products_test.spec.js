@@ -8,7 +8,7 @@ describe('Produtos', () => {
         })
     })
 
-    it('Buscar por um produto', () => {
+    it('Buscar por um produto', {tags: ['@regression'] }, () => {
        cy.fixture('hard_drive_portable_2t.json').then((expectBody) => {
             cy.getSingleProduct(expectBody.id)
                 .then(response => {
@@ -42,7 +42,7 @@ describe('Produtos', () => {
             })
         })
 
-        it('Buscar por uma categoria', () => {
+        it('Buscar por uma categoria', {tags: ['@regression'] }, () => {
             cy.fixture('all_eletronic_products.json').then((expectBody) => {
                 cy.getSpecificCategory('eletronic')
                     .then(response => {

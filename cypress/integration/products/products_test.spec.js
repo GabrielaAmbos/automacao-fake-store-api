@@ -1,5 +1,4 @@
-
-describe('Produtos', () => {
+context('Produtos', { tags: ['@regression', '@activities'] }, () => {
 
     it('Buscar todos os produtos', () => {
         cy.getAllProductos()
@@ -62,7 +61,6 @@ describe('Produtos', () => {
                     expect(response.body).to.equal('')  
                 })
         })*/
-
 
     })
     

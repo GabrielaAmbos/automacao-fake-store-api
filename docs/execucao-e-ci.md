@@ -2,15 +2,27 @@
 
 ## Pré-requisitos
 
-- **Node.js `^20.1.0 || ^22.0.0 || >=24.0.0`** — exigência do Cypress 15
+- **Node.js `^20.1.0 || ^22.0.0 || >=24.0.0`** — exigência do Cypress 15. O
+  [.nvmrc](../.nvmrc) fixa a 22; com o `nvm` instalado, basta `nvm use`.
 - Acesso à internet — os testes chamam a API pública `https://fakestoreapi.com`
+
+## Scripts disponíveis
+
+| Script | O que faz |
+| --- | --- |
+| `npm run cy:open` | Abre o Test Runner (modo interativo) |
+| `npm run cy:run` | Executa a suíte headless |
+| `npm test` | Alias de `cy:run` — é o que o CI e outras ferramentas esperam |
+| `npm run test:smoke` | Executa só os testes `@smoke` |
+| `npm run lint` | Roda o ESLint |
+| `npm run lint:fix` | Roda o ESLint corrigindo o que é auto-corrigível |
 
 ## Execução local
 
 ```bash
 npm i            # instala as dependências
-npm run cy:open  # abre o Test Runner (npx cypress open)
-npm run cy:run   # executa headless (npx cypress run)
+npm run cy:open  # abre o Test Runner (modo interativo)
+npm test         # executa headless
 ```
 
 ### Variações úteis
@@ -77,7 +89,17 @@ npx marge merged.json
 
 ### `main.yml` — Execução automação de testes
 
-Roda a suíte de testes. É disparado por:
+Dois jobs em sequência:
+
+| Job | O que faz |
+| --- | --- |
+| **lint** | `npm ci --ignore-scripts` (pula o download do binário do Cypress, desnecessário aqui) e `npm run lint` |
+| **test** | Roda a suíte — só começa se o lint passar (`needs: lint`) |
+
+Ambos usam `node-version-file: '.nvmrc'`, então a versão do Node fica definida em um só
+lugar.
+
+É disparado por:
 
 - **`workflow_dispatch`** (manual), com três entradas:
 
@@ -89,9 +111,8 @@ Roda a suíte de testes. É disparado por:
 
 - **`pull_request`** com destino na branch `main`.
 
-O job roda em `ubuntu-latest` com Node 22 (`actions/setup-node@v4`) e a action
-`cypress-io/github-action@v6`, que cuida do cache do binário do Cypress. Comando
-executado:
+O job de teste roda em `ubuntu-latest` com a action `cypress-io/github-action@v6`, que
+cuida do cache do binário do Cypress. Comando executado:
 
 ```bash
 npx cypress run \

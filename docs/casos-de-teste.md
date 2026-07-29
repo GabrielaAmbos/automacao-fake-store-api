@@ -1,111 +1,165 @@
 # Casos de teste
 
-Arquivo: [cypress/e2e/products/products.cy.js](../cypress/e2e/products/products.cy.js)
+**40 testes** distribuídos em quatro specs, uma por recurso da API.
 
-Todos os testes estão sob o `context('Produtos')`, marcado com as tags
-`@regression` e `@activities`.
+| Spec | Recurso | Testes |
+| --- | --- | --- |
+| [products.cy.js](../cypress/e2e/products/products.cy.js) | `/products` | 15 |
+| [carts.cy.js](../cypress/e2e/carts/carts.cy.js) | `/carts` | 12 |
+| [users.cy.js](../cypress/e2e/users/users.cy.js) | `/users` | 9 |
+| [auth.cy.js](../cypress/e2e/auth/auth.cy.js) | `/auth/login` | 4 |
 
-## Resumo
+Cada spec agrupa os testes em `context` internos — **Leitura**, **Categorias** e
+**Escrita** — para separar o que consulta do que altera.
 
-| # | Teste | Endpoint | Fixture | Status |
-| --- | --- | --- | --- | --- |
-| 1 | Buscar todos os produtos | `GET /products` | — | ativo |
-| 2 | Buscar por um produto | `GET /products/9` | `hard_drive_portable_2t.json` | ativo |
-| 3 | Buscar por produto inexistente | `GET /products/-1` | — | ativo |
-| 4 | Buscar todas as categorias | `GET /products/categories` | `all_categories.json` | ativo |
-| 5 | Buscar por uma categoria | `GET /products/category/{nome}` | `all_electronics_products.json` | comentado |
-| 6 | Buscar por uma categoria inexistente | `GET /products/category/noneC` | — | comentado |
+## Produtos — 15 testes
 
-## Detalhamento
+### Leitura
 
-### 1. Buscar todos os produtos
+| Teste | Endpoint | Valida |
+| --- | --- | --- |
+| Buscar todos os produtos | `GET /products` | `200`, array com 20 itens |
+| Validar o contrato de um produto da listagem | `GET /products` | Chaves e tipos do objeto, incluindo `rating.rate` e `rating.count` |
+| Buscar por um produto | `GET /products/9` | Compara `title`, `description`, `price` e `category` com a fixture |
+| Buscar por produto inexistente | `GET /products/-1` | `200` com body vazio (`''`) |
+| Limitar a quantidade de produtos | `GET /products?limit=3` | Retorna exatamente 3 itens |
+| Ordenar de forma crescente | `GET /products?sort=asc` | Ids em ordem crescente |
+| Ordenar de forma decrescente | `GET /products?sort=desc` | Ids em ordem decrescente |
 
-Valida apenas o contrato mínimo: a listagem responde `200`.
+### Categorias
 
-```js
-cy.getAllProductos().then(response => {
-  expect(response.status).to.equal(200)
-})
-```
+| Teste | Endpoint | Valida |
+| --- | --- | --- |
+| Buscar todas as categorias | `GET /products/categories` | As 4 categorias, **sem depender da ordem** |
+| Buscar por uma categoria | `GET /products/category/electronics` | Todo item retornado tem `category === 'electronics'` |
+| Buscar por uma categoria com espaço no nome | `GET /products/category/men's clothing` | O encode da URL funciona |
+| Buscar por uma categoria inexistente | `GET /products/category/noneC` | `200` com array vazio |
 
-Não há asserção sobre o corpo — nem tamanho da lista, nem formato dos itens.
+### Escrita
 
-### 2. Buscar por um produto
+| Teste | Endpoint | Valida |
+| --- | --- | --- |
+| Cadastrar um novo produto | `POST /products` | `201`, id gerado, campos ecoados |
+| Atualizar um produto por completo | `PUT /products/7` | `200`, id preservado, campos atualizados |
+| Atualizar apenas o preço | `PATCH /products/7` | `200`, só o preço muda |
+| Excluir um produto | `DELETE /products/6` | `200`, resposta traz o produto excluído |
 
-Carrega a fixture `hard_drive_portable_2t.json` (produto de id `9`), consulta o produto
-por esse id e compara campo a campo:
+## Carrinhos — 12 testes
 
-- `status` = `200`
-- `body.title`, `body.description`, `body.price`, `body.category` iguais aos da fixture
+### Leitura
 
-Os campos `image` e `rating` não são verificados — `rating` muda ao longo do tempo na
-API pública, então mantê-lo fora da asserção evita falha intermitente.
+| Teste | Endpoint | Valida |
+| --- | --- | --- |
+| Buscar todos os carrinhos | `GET /carts` | `200`, array com 7 itens |
+| Validar o contrato de um carrinho | `GET /carts` | `id`, `userId`, `date` e cada item de `products` com `productId`/`quantity` |
+| Buscar por um carrinho | `GET /carts/1` | `200`, id correto, lista de produtos preenchida |
+| Buscar por carrinho inexistente | `GET /carts/999` | `200` com body **`null`** |
+| Buscar os carrinhos de um usuário | `GET /carts/user/1` | Todo carrinho tem `userId === 1` |
+| Buscar os carrinhos de um usuário sem compras | `GET /carts/user/999` | `200` com array vazio |
+| Limitar a quantidade de carrinhos | `GET /carts?limit=2` | Retorna 2 itens |
+| Ordenar de forma decrescente | `GET /carts?sort=desc` | Ids em ordem decrescente |
+| Buscar por intervalo de datas | `GET /carts?startdate=&enddate=` | `200` e array (ver ressalva abaixo) |
 
-### 3. Buscar por produto inexistente
+### Escrita
 
-Consulta o id `-1` e espera:
+| Teste | Endpoint | Valida |
+| --- | --- | --- |
+| Cadastrar um novo carrinho | `POST /carts` | `201`, id gerado, `products` ecoado |
+| Atualizar um carrinho | `PUT /carts/3` | `200`, id preservado |
+| Excluir um carrinho | `DELETE /carts/2` | `200`, resposta traz o carrinho excluído |
 
-- `status` = `200`
-- `body` = `''` (string vazia)
+> **Ressalva sobre o filtro de datas:** o teste verifica apenas status e tipo, porque a
+> API ignora o intervalo — `startdate=2019-12-10&enddate=2020-10-10` devolve os 7
+> carrinhos, incluindo os de fora da faixa. Asseverar a filtragem faria o teste falhar
+> contra o comportamento real.
 
-Este é o comportamento real da Fake Store API: em vez de `404`, ela responde `200` com
-corpo vazio para ids inexistentes. O teste documenta essa peculiaridade.
+## Usuários — 9 testes
 
-### 4. Buscar todas as categorias
+### Leitura
 
-Compara o array retornado, **posição a posição**, com os valores da fixture
-`all_categories.json`:
+| Teste | Endpoint | Valida |
+| --- | --- | --- |
+| Buscar todos os usuários | `GET /users` | `200`, array com 10 itens |
+| Validar o contrato de um usuário | `GET /users` | `name.firstname/lastname`, `address` e `address.geolocation` aninhados |
+| Buscar por um usuário | `GET /users/1` | `200`, id correto |
+| Buscar por usuário inexistente | `GET /users/999` | `200` com body **`null`** |
+| Limitar a quantidade de usuários | `GET /users?limit=2` | Retorna 2 itens |
+| Ordenar de forma decrescente | `GET /users?sort=desc` | Ids em ordem decrescente |
 
-| Índice | Valor esperado |
+### Escrita
+
+| Teste | Endpoint | Valida |
+| --- | --- | --- |
+| Cadastrar um novo usuário | `POST /users` | `201` — a resposta traz **apenas** `{ id }` |
+| Atualizar um usuário | `PUT /users/1` | `200`, campos ecoados (sem `id` na resposta) |
+| Excluir um usuário | `DELETE /users/2` | `200`, resposta traz o usuário excluído |
+
+## Autenticação — 4 testes
+
+| Teste | Cenário | Valida |
+| --- | --- | --- |
+| Autenticar com credenciais válidas | `johnd` / senha correta | `201` e token no formato JWT (`x.y.z`) |
+| Rejeitar credenciais inválidas | usuário inexistente | `401`, corpo contém `incorrect` |
+| Rejeitar login com a senha errada | usuário válido, senha errada | `401` |
+| Rejeitar login sem username e password | body `{}` | `400`, corpo contém `not provided` |
+
+O comando `cy.postLogin()` usa `failOnStatusCode: false`, sem o qual o Cypress falharia
+sozinho ao receber `401`/`400` — que é exatamente o esperado nesses cenários.
+
+## Comportamentos da API que os testes documentam
+
+A suíte serve também como registro de peculiaridades da Fake Store API, descobertas ao
+sondar os endpoints antes de escrever as asserções:
+
+| Situação | Resposta |
 | --- | --- |
-| `0` | `electronics` |
-| `1` | `jewelery` |
-| `2` | `men's clothing` |
-| `3` | `women's clothing` |
+| `GET /products/{id inexistente}` | `200` com body **vazio** (`''`) |
+| `GET /carts/{id inexistente}` | `200` com body **`null`** |
+| `GET /users/{id inexistente}` | `200` com body **`null`** |
+| `GET /products/category/{inexistente}` | `200` com **array vazio** |
+| `POST` em qualquer recurso | **`201`** |
+| `PUT` / `PATCH` / `DELETE` | **`200`** |
+| `DELETE` | Retorna o recurso excluído, não um corpo vazio |
+| `POST /users` | Retorna só `{ id }`, diferente dos outros POSTs |
+| `POST /auth/login` com erro | `401` / `400` com corpo em **texto puro**, não JSON |
 
-O teste depende da ordem em que a API devolve as categorias — se ela mudar, o teste
-quebra mesmo com o conteúdo correto.
-
-### 5 e 6. Testes de categoria (comentados)
-
-Ficam no fim do arquivo, desativados. Dois problemas os impedem de rodar como estão:
-
-- **Teste 5** — perdeu o prefixo `it(`, então é apenas uma expressão solta. Além disso
-  usa `'eletronic'` (grafia incorreta; a categoria válida é `electronics`) e busca a
-  fixture `all_eletronic_products.json`, enquanto o arquivo existente chama-se
-  `all_electronics_products.json`. Sua asserção `expect(response.body)` também não
-  compara nada.
-- **Teste 6** — assume corpo vazio para categoria inexistente, replicando a expectativa
-  do teste 3.
+Nenhum `4xx` é devolvido para recurso inexistente em `GET` — só a autenticação usa
+códigos de erro de verdade.
 
 ## Fixtures
 
 | Arquivo | Conteúdo | Usada por |
 | --- | --- | --- |
-| `hard_drive_portable_2t.json` | Um produto completo (id 9, categoria electronics) | Teste 2 |
-| `all_categories.json` | Objeto com as 4 categorias nomeadas | Teste 4 |
-| `all_electronics_products.json` | Array de produtos da categoria electronics | Nenhuma (prevista para o teste 5) |
-| `all_jewelery_products.json` | Array de produtos da categoria jewelery | Nenhuma |
+| `hard_drive_portable_2t.json` | Produto completo (id 9) | Buscar por um produto |
+| `all_categories.json` | As 4 categorias nomeadas | Buscar todas as categorias |
+| `new_product.json` | Payload de produto para `POST`/`PUT` | Testes de escrita de produtos |
+| `new_cart.json` | Payload de carrinho | Testes de escrita de carrinhos |
+| `new_user.json` | Payload de usuário | Testes de escrita de usuários |
+| `credentials.json` | Credenciais válidas e inválidas | Todos os testes de autenticação |
+| `all_electronics_products.json` | Array de produtos electronics | **Nenhuma** |
+| `all_jewelery_products.json` | Array de produtos jewelery | **Nenhuma** |
 
-Em `all_categories.json` as categorias são **chaves nomeadas** (`category_electronics`),
-não um array — por isso o teste 4 acessa `expectBody.category_electronics` e compara com
-`response.body[0]`.
+As duas últimas continuam ociosas de propósito: o teste de categoria valida que **todo**
+item retornado pertence à categoria pedida, em vez de comparar com uma lista fixa. Isso
+não quebra quando o catálogo da API muda.
+
+> As credenciais em `credentials.json` são as de demonstração publicadas pela própria
+> Fake Store API — não são segredos.
 
 ## Tags
 
-O `context` e o teste 2 declaram tags no segundo argumento:
-
-```js
-context('Produtos', { tags: ['@regression', '@activities'] }, () => { ... })
-it('Buscar por um produto', { tags: ['@regression'] }, () => { ... })
-```
-
-Essas tags são consumidas pelo `@cypress/grep`, registrado em
-[cypress/support/e2e.js](../cypress/support/e2e.js). Para filtrar:
+| Tag | Alcance | Testes |
+| --- | --- | --- |
+| `@regression` | Todas as specs | 40 |
+| `@products` | Spec de produtos | 15 |
+| `@carts` | Spec de carrinhos | 12 |
+| `@users` | Spec de usuários | 9 |
+| `@smoke` | Um caso principal por recurso | 7 |
+| `@auth` | Spec de autenticação | 4 |
+| `@activities` | Spec de produtos (herdada do projeto original) | 15 |
 
 ```bash
-npx cypress run --expose grepTags=@regression
+npx cypress run --expose grepTags=@smoke
 ```
 
-Como o `context` inteiro está marcado, `@regression` e `@activities` selecionam os quatro
-testes. Detalhes de sintaxe em [Execução e CI](execucao-e-ci.md#filtrar-testes-por-tag).
+Detalhes de sintaxe em [Execução e CI](execucao-e-ci.md#filtrar-testes-por-tag).

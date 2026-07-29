@@ -1,35 +1,33 @@
 # Comandos customizados
 
-Todos os comandos ficam em [cypress/support/products_commands.js](../cypress/support/products_commands.js)
-e são registrados globalmente por [cypress/support/e2e.js](../cypress/support/e2e.js),
-ficando disponíveis como `cy.<comando>()` em qualquer spec.
+Os comandos ficam em `cypress/support/`, um arquivo por recurso da API, e são registrados
+globalmente por [cypress/support/e2e.js](../cypress/support/e2e.js) — ficando disponíveis
+como `cy.<comando>()` em qualquer spec.
+
+| Arquivo | Recurso |
+| --- | --- |
+| [products_commands.js](../cypress/support/products_commands.js) | `/products` |
+| [carts_commands.js](../cypress/support/carts_commands.js) | `/carts` |
+| [users_commands.js](../cypress/support/users_commands.js) | `/users` |
+| [auth_commands.js](../cypress/support/auth_commands.js) | `/auth/login` |
 
 Cada comando devolve o *yield* de `cy.request()`, ou seja, um objeto de resposta com
 `status`, `body`, `headers` e `duration`. As asserções acontecem no `.then()` da spec.
 
-## Referência
+## Produtos
 
-### `cy.getAllProductos()`
-
-`GET /products` — retorna a lista completa de produtos.
-
-```js
-cy.getAllProductos().then(response => {
-  expect(response.status).to.equal(200)
-})
-```
-
-> O nome mistura português e inglês (`Productos`). Mantido como está para não quebrar as
-> specs existentes; a padronização para `getAllProducts` está listada em
-> [Melhorias conhecidas](melhorias-conhecidas.md).
-
-### `cy.getSingleProduct(queryString)`
-
-`GET /products/{queryString}` — busca um produto por id.
-
-| Parâmetro | Tipo | Descrição |
-| --- | --- | --- |
-| `queryString` | `number \| string` | Id do produto |
+| Comando | Requisição |
+| --- | --- |
+| `cy.getAllProducts()` | `GET /products` |
+| `cy.getSingleProduct(id)` | `GET /products/{id}` |
+| `cy.getProductsLimitResult(limit)` | `GET /products?limit={limit}` |
+| `cy.getProductsSortResult(direction)` | `GET /products?sort={asc\|desc}` |
+| `cy.getAllCategories()` | `GET /products/categories` |
+| `cy.getSpecificCategory(name)` | `GET /products/category/{name}` |
+| `cy.postAddNewProduct(jsonBody)` | `POST /products` |
+| `cy.putUpdateProduct(id, jsonBody)` | `PUT /products/{id}` |
+| `cy.patchUpdateProduct(id, jsonBody)` | `PATCH /products/{id}` |
+| `cy.deleteProduct(id)` | `DELETE /products/{id}` |
 
 ```js
 cy.getSingleProduct(9).then(response => {
@@ -37,84 +35,68 @@ cy.getSingleProduct(9).then(response => {
 })
 ```
 
-### `cy.getProductsLimitResult(queryString)`
+`getSpecificCategory` aplica `encodeURIComponent` no nome, o que é necessário para
+categorias com espaço e apóstrofo como `men's clothing`.
 
-`GET /products?limit={queryString}` — limita a quantidade de produtos retornados.
+## Carrinhos
 
-| Parâmetro | Tipo | Descrição |
-| --- | --- | --- |
-| `queryString` | `number` | Quantidade máxima de itens |
-
-### `cy.getProductsSortResult(queryString)`
-
-`GET /products?sort={queryString}` — ordena o resultado.
-
-| Parâmetro | Tipo | Descrição |
-| --- | --- | --- |
-| `queryString` | `'asc' \| 'desc'` | Direção da ordenação |
-
-### `cy.getAllCategories()`
-
-`GET /products/categories` — retorna o array de nomes de categoria.
-
-### `cy.getSpecificCategory(queryString)`
-
-`GET /products/category/{queryString}` — retorna os produtos de uma categoria.
-
-| Parâmetro | Tipo | Descrição |
-| --- | --- | --- |
-| `queryString` | `string` | `electronics`, `jewelery`, `men's clothing` ou `women's clothing` |
-
-### `cy.postAddNewProduct(jsonBody)`
-
-`POST /products` — cria um produto.
-
-| Parâmetro | Tipo | Descrição |
-| --- | --- | --- |
-| `jsonBody` | `object` | Corpo do produto a criar |
-
-### `cy.putUpdateProduct(productId)`
-
-`PUT products/{productId}` — atualiza um produto.
-
-> ⚠️ Duas limitações: o comando **não envia body**, então não há o que atualizar; e a URL
-> é `'products/' + productId` (sem a barra inicial), o que resolve de forma diferente das
-> demais em relação à `baseUrl`.
-
-### `cy.deleteProduct(productId)`
-
-`DELETE` de um produto.
-
-> ⚠️ **Comando quebrado.** A URL é montada com `getUrlAllProducts()`, uma função que não
-> existe no projeto. Qualquer chamada lança `ReferenceError`.
-
-## Cobertura atual
-
-| Comando | Usado em teste |
+| Comando | Requisição |
 | --- | --- |
-| `getAllProductos` | ✅ |
-| `getSingleProduct` | ✅ |
-| `getAllCategories` | ✅ |
-| `getSpecificCategory` | ⚠️ apenas em testes comentados |
-| `getProductsLimitResult` | ❌ |
-| `getProductsSortResult` | ❌ |
-| `postAddNewProduct` | ❌ |
-| `putUpdateProduct` | ❌ |
-| `deleteProduct` | ❌ |
+| `cy.getAllCarts()` | `GET /carts` |
+| `cy.getSingleCart(id)` | `GET /carts/{id}` |
+| `cy.getCartsByUser(userId)` | `GET /carts/user/{userId}` |
+| `cy.getCartsLimitResult(limit)` | `GET /carts?limit={limit}` |
+| `cy.getCartsSortResult(direction)` | `GET /carts?sort={asc\|desc}` |
+| `cy.getCartsByDateRange(start, end)` | `GET /carts?startdate={start}&enddate={end}` |
+| `cy.postAddNewCart(jsonBody)` | `POST /carts` |
+| `cy.putUpdateCart(id, jsonBody)` | `PUT /carts/{id}` |
+| `cy.deleteCart(id)` | `DELETE /carts/{id}` |
+
+## Usuários
+
+| Comando | Requisição |
+| --- | --- |
+| `cy.getAllUsers()` | `GET /users` |
+| `cy.getSingleUser(id)` | `GET /users/{id}` |
+| `cy.getUsersLimitResult(limit)` | `GET /users?limit={limit}` |
+| `cy.getUsersSortResult(direction)` | `GET /users?sort={asc\|desc}` |
+| `cy.postAddNewUser(jsonBody)` | `POST /users` |
+| `cy.putUpdateUser(id, jsonBody)` | `PUT /users/{id}` |
+| `cy.deleteUser(id)` | `DELETE /users/{id}` |
+
+## Autenticação
+
+| Comando | Requisição |
+| --- | --- |
+| `cy.postLogin(jsonBody)` | `POST /auth/login` |
+
+Único comando com `failOnStatusCode: false`, para que os cenários negativos (`401` de
+credencial inválida, `400` de payload malformado) cheguem ao `.then()` em vez de o
+Cypress falhar sozinho.
+
+```js
+cy.postLogin({ username: 'johnd', password: 'errada' }).then(response => {
+  expect(response.status).to.equal(401)
+})
+```
 
 ## Como adicionar um novo comando
 
-1. Declare-o em `cypress/support/products_commands.js` usando `Cypress.Commands.add`.
-2. Use caminho relativo (`/products/...`) para respeitar a `baseUrl` da configuração.
+1. Declare-o no arquivo do recurso correspondente usando `Cypress.Commands.add`. Recurso
+   novo pede arquivo novo, importado em `cypress/support/e2e.js`.
+2. Use caminho relativo (`/products/...`) para respeitar a `baseUrl`.
 3. Não coloque asserções dentro do comando — ele apenas transporta a resposta.
 4. Se a API puder retornar erro (4xx/5xx) e isso for o esperado no teste, adicione
-   `failOnStatusCode: false` ao objeto de request.
+   `failOnStatusCode: false`.
+5. Comandos de escrita recebem o payload como parâmetro; não embuta corpo fixo no
+   comando.
 
 ```js
-Cypress.Commands.add('getProductsSortResult', queryString => {
+Cypress.Commands.add('putUpdateProduct', (productId, jsonBody) => {
     cy.request({
-        method: 'GET',
-        url: '/products?sort=' + queryString
+        method: 'PUT',
+        url: '/products/' + productId,
+        body: jsonBody
     })
 })
 ```

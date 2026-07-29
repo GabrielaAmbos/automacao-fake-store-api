@@ -51,8 +51,10 @@ npx cypress run --expose grepTags=@regression          # filtrar por tag
 npx cypress run --config-file config/dev.config.js     # ambiente específico
 ```
 
-**Rode `npm run lint` antes de considerar qualquer mudança pronta.** O CI bloqueia os
-testes se o lint falhar.
+**Rode `npm run lint` E `npm test` localmente antes de considerar qualquer mudança
+pronta.** O CI de pull request roda **apenas o lint** — a Fake Store API responde 403 aos
+runners hospedados do GitHub (bloqueio de IP de datacenter), então a suíte de API não é
+executada lá. Verde no PR não significa que os testes passaram.
 
 ## Padrões a seguir
 

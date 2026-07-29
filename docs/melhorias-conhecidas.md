@@ -23,6 +23,24 @@ contra o comportamento real da API. Se a API for corrigida, o teste deve ser ref
 `PUT`, `PATCH` e `DELETE` usam ids fixos (6, 7, 2, 3). Como a API não persiste nada, não
 há efeito colateral entre execuções — mas os ids precisam existir na massa.
 
+## A API bloqueia os runners do GitHub
+
+A Fake Store API responde **403 Forbidden** a requisições vindas de runners hospedados do
+GitHub. Confirmado na primeira execução real do workflow: 40 de 40 testes falharam com
+403, com o User-Agent já se apresentando como Chrome — ou seja, é bloqueio por faixa de
+IP de datacenter, não por cliente.
+
+A suíte de API ficou sob execução manual e o PR roda só o lint. Caminhos para recuperar a
+execução automática, em ordem de esforço:
+
+1. **Runner self-hosted** — mantém o teste contra a API real; exige infraestrutura.
+2. **Mockar com `cy.intercept()`** e respostas gravadas — roda em qualquer lugar, mas
+   passa a testar contrato contra dados congelados, não a API viva.
+3. **Trocar de alvo** para uma API pública que não bloqueie datacenter.
+
+O que **não** fazer: mascarar a origem para driblar a proteção, ou marcar o job como
+`continue-on-error` — um check que sempre falha é um check que ninguém lê.
+
 ## Segurança de dependências
 
 `npm audit` reporta **8 alertas residuais** (0 críticos), todos transitivos de

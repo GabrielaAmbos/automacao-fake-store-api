@@ -145,9 +145,15 @@ customizado, e os dados ficam em fixtures.
 
 ## Integração contínua
 
-O workflow **Execução automação de testes** roda a suíte a cada pull request para `main`
-e pode ser disparado manualmente, escolhendo navegador (`chrome`/`electron`), ambiente e
-tag.
+| Workflow | Quando roda |
+| --- | --- |
+| **Lint** | A cada pull request para `main` e push na `main` |
+| **Execução automação de testes** | Só manualmente, escolhendo navegador, ambiente e tag |
+
+> A suíte de API não roda em pull requests porque a Fake Store API responde **403** a
+> requisições vindas dos runners hospedados do GitHub — as faixas de IP de datacenter são
+> bloqueadas. Os testes estão corretos e passam localmente; rodá-los no CI produziria um
+> check cronicamente vermelho. Detalhes em [Execução e CI](docs/execucao-e-ci.md).
 
 ## Documentação
 

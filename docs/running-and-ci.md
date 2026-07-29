@@ -63,6 +63,34 @@ Tests that do not match the filter show up as **pending**, not as failures.
 > ⚠️ If the tag does not exist on any test, the run finishes successfully having executed
 > nothing. Check the available tags in [test-cases.md](test-cases.md#tags).
 
+## The pre-push hook
+
+Because CI cannot run the API suite, nothing on the server side would catch a broken test
+before it reaches `main` — a green pull request only means ESLint passed. The gap is
+covered locally instead.
+
+[.githooks/pre-push](../.githooks/pre-push) runs `npm run lint` and then `npm test` on
+every push. It is installed by the `prepare` npm script, which points `core.hooksPath` at
+the versioned `.githooks/` directory — so `npm i` is all a fresh clone needs. No extra
+dependency, no Husky.
+
+Three details it handles:
+
+| Case | Behaviour |
+| --- | --- |
+| Branch deletion (`git push --delete`) | Skips the suite — there is nothing to test |
+| VS Code terminal | Clears `ELECTRON_RUN_AS_NODE`, which would otherwise make Cypress die on `bad option: --no-sandbox` and block the push for the wrong reason |
+| Deliberate bypass | `git push --no-verify`, for docs-only or work-in-progress pushes |
+
+Cost is roughly 17 seconds per push.
+
+If the hook ever stops firing, check that the path is still set:
+
+```bash
+git config core.hooksPath   # expected: .githooks
+npm run prepare             # re-applies it
+```
+
 ## Reports
 
 The configured reporter is **mochawesome**. Every run writes HTML and JSON to:

@@ -56,6 +56,10 @@ pronta.** O CI de pull request roda **apenas o lint** — a Fake Store API respo
 runners hospedados do GitHub (bloqueio de IP de datacenter), então a suíte de API não é
 executada lá. Verde no PR não significa que os testes passaram.
 
+O hook `.githooks/pre-push` roda os dois automaticamente antes de cada push (instalado
+pelo script `prepare`, via `core.hooksPath`). Não use `git push --no-verify` para
+contornar teste falhando — ele existe para push de documentação.
+
 ## Padrões a seguir
 
 - **Nunca monte URL dentro da spec.** Chamadas HTTP ficam em

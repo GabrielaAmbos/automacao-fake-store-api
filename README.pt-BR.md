@@ -159,7 +159,9 @@ customizado, e os dados ficam em fixtures.
 > A suíte de API não roda em pull requests porque a Fake Store API responde **403** a
 > requisições vindas dos runners hospedados do GitHub — as faixas de IP de datacenter são
 > bloqueadas. Os testes estão corretos e passam localmente; rodá-los no CI produziria um
-> check cronicamente vermelho. Detalhes em [Running and CI](docs/running-and-ci.md).
+> check cronicamente vermelho. Um [hook de pre-push](.githooks/pre-push) roda o lint e a
+> suíte localmente, cobrindo a lacuna na hora do push. Detalhes em
+> [Running and CI](docs/running-and-ci.md).
 
 ## Documentação
 

@@ -135,11 +135,27 @@ npx cypress run \
 At the end, the mochawesome report is published as a run artifact
 (`actions/upload-artifact@v4`, 20-day retention), downloadable from the run page.
 
-### `static.yml` — Deploy static content to Pages
+### GitHub Pages (disabled)
 
-Publishes **the whole repository** (`path: '.'`) to GitHub Pages on every push to `main`,
-or manually. It exists to expose the versioned HTML report, but today it uploads every
-file in the repository, not just the report folder.
+The repository used to publish a Pages site, built by GitHub's legacy Jekyll mode from
+the root of `main`. It has been **turned off**, along with the `static.yml` workflow that
+was meant to feed it.
+
+Both were dropped for the same reason: neither did anything worth keeping.
+
+- `static.yml` failed on **every** push. `upload-pages-artifact@v2` depends on the
+  deprecated `upload-artifact@v3`, which GitHub now fails automatically.
+- The site did not depend on that workflow anyway — the legacy build served it — and all
+  it rendered was the README, which GitHub already displays better.
+- Nothing in the repository linked to the Pages URL.
+- It served the whole repository as static files, which is a distribution surface with no
+  purpose behind it.
+
+Publishing the test report through Pages would have needed a different design regardless:
+`cypress/report/` is gitignored, so no report is ever committed. The `main.yml` workflow
+already uploads the mochawesome report as a run artifact, which covers that need.
+
+To bring a site back, re-enable Pages under **Settings → Pages** and pick a source.
 
 ## Troubleshooting
 

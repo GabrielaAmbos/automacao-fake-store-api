@@ -34,7 +34,7 @@ cypress/fixtures/*.json                    # payloads de escrita e valores esper
 cypress/support/e2e.js                     # registra o grep e os commands
 cypress/support/<recurso>_commands.js      # comandos customizados, um arquivo por recurso
 .github/workflows/main.yml                 # pipeline de testes
-.github/workflows/static.yml               # deploy no GitHub Pages
+.github/workflows/lint.yml                 # ESLint em PR e push na main
 ```
 
 Documentação completa em [docs/](docs/README.md).

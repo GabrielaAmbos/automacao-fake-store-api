@@ -32,6 +32,8 @@ automacao-fake-store-api/
 ├── .github/workflows/
 │   ├── lint.yml                  # ESLint on pull requests and pushes to main
 │   └── main.yml                  # API suite, manual dispatch only
+├── .githooks/
+│   └── pre-push                  # Runs lint + the suite before every push
 ├── .editorconfig                 # File style shared across editors
 ├── .nvmrc                        # Node version used by the project and by CI
 ├── eslint.config.mjs             # ESLint configuration (flat config)

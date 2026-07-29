@@ -13,13 +13,12 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Enables filtering tests by tag, e.g. --env grepTags=@regression
-const { register: registerCypressGrep } = require('@cypress/grep')
-registerCypressGrep()
+import { register as registerCypressGrep } from '@cypress/grep'
 
-// Import commands.js using ES2015 syntax:
-import './commands'
+import './auth_commands'
+import './carts_commands'
 import './products_commands'
+import './users_commands'
 
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
+// Enables filtering tests by tag, e.g. --expose grepTags=@regression
+registerCypressGrep()

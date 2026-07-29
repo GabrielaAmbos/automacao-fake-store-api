@@ -1,0 +1,8 @@
+{
+    "userId": 5,
+    "date": "2026-07-29",
+    "products": [
+        { "productId": 9, "quantity": 2 },
+        { "productId": 5, "quantity": 1 }
+    ]
+}

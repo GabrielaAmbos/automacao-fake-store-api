@@ -1,34 +1,46 @@
 {
   "name": "automacao-fake-store-api",
   "version": "1.0.0",
-  "description": "I'm studying about Cypress.",
-  "main": "index.js",
-  "homepage": "https://github.com/GabrielaAmbos/cypress#readme",
-  "scripts": {
-    "cy:open": "npx cypress open",
-    "cy:run": "npx cypress run"
+  "description": "Testes automatizados de API para a Fake Store API com Cypress.",
+  "private": true,
+  "homepage": "https://github.com/GabrielaAmbos/automacao-fake-store-api#readme",
+  "bugs": {
+    "url": "https://github.com/GabrielaAmbos/automacao-fake-store-api/issues"
   },
-  "author": "Gabriela Ambos",
-  "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GabrielaAmbos/cypress.git"
+    "url": "git+https://github.com/GabrielaAmbos/automacao-fake-store-api.git"
   },
+  "author": "Gabriela Ambos",
+  "license": "MIT",
+  "keywords": [
+    "cypress",
+    "api-testing",
+    "test-automation",
+    "fakestoreapi",
+    "javascript"
+  ],
   "engines": {
     "node": "^20.1.0 || ^22.0.0 || >=24.0.0"
   },
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test": "cypress run",
+    "test:smoke": "cypress run --expose grepTags=@smoke",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
   "devDependencies": {
     "@cypress/grep": "^6.0.2",
+    "@eslint/js": "^10.0.1",
     "cypress": "^15.19.0",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "joi": "17.2.1",
-    "mocha": "^7.2.0",
+    "eslint": "^10.8.0",
+    "eslint-plugin-cypress": "^6.4.3",
+    "eslint-plugin-mocha": "^12.0.1",
+    "globals": "^17.8.0",
+    "mocha": "^11.7.6",
     "mochawesome": "^7.1.4",
-    "mochawesome-report-generator": "^6.3.2",
-    "mongodb": "^3.6.3",
-    "mongoose": "^5.7.5",
-    "node-fetch": "^2.6.1",
-    "npm-run-all": "^4.1.5"
+    "mochawesome-report-generator": "^6.3.2"
   }
 }

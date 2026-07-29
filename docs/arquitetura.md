@@ -8,21 +8,34 @@ automacao-fake-store-api/
 │   ├── base.js                   # Factory com a configuração compartilhada
 │   └── dev.config.js             # Ambiente dev (usado no CI)
 ├── cypress/
-│   ├── e2e/                      # Especificações de teste
-│   │   └── products/
-│   │       └── products.cy.js
+│   ├── e2e/                      # Especificações de teste, uma pasta por recurso
+│   │   ├── auth/auth.cy.js
+│   │   ├── carts/carts.cy.js
+│   │   ├── products/products.cy.js
+│   │   └── users/users.cy.js
 │   ├── fixtures/                 # Massa de dados / respostas esperadas
 │   │   ├── all_categories.json
 │   │   ├── all_electronics_products.json
 │   │   ├── all_jewelery_products.json
-│   │   └── hard_drive_portable_2t.json
+│   │   ├── credentials.json
+│   │   ├── hard_drive_portable_2t.json
+│   │   ├── new_cart.json
+│   │   ├── new_product.json
+│   │   └── new_user.json
 │   └── support/
 │       ├── e2e.js                # Carregado antes de cada spec; registra grep e commands
-│       ├── commands.js           # Boilerplate do Cypress (sem comandos próprios)
-│       └── products_commands.js  # Comandos customizados de produtos
+│       ├── index.d.ts            # Tipagem dos comandos customizados (autocomplete)
+│       ├── auth_commands.js      # Comandos de autenticação
+│       ├── carts_commands.js     # Comandos de carrinhos
+│       ├── products_commands.js  # Comandos de produtos
+│       └── users_commands.js     # Comandos de usuários
 ├── .github/workflows/
-│   ├── main.yml                  # Pipeline de execução dos testes
+│   ├── main.yml                  # Pipelines de lint e testes
 │   └── static.yml                # Publicação do repositório no GitHub Pages
+├── .editorconfig                 # Estilo de arquivo compartilhado entre editores
+├── .nvmrc                        # Versão do Node usada no projeto e no CI
+├── eslint.config.mjs             # Configuração do ESLint (flat config)
+├── jsconfig.json                 # Faz o editor enxergar os tipos nos arquivos .js
 ├── cypress.config.js             # Configuração padrão (execuções locais)
 └── package.json
 ```
@@ -33,15 +46,17 @@ O projeto segue uma separação simples em três camadas, o que evita repetir ch
 dentro dos testes:
 
 ```
-spec (products.cy.js)
-   └── comandos customizados (products_commands.js)   →  cy.request() para a API
-   └── fixtures (*.json)                              →  dados esperados
+spec (<recurso>.cy.js)
+   └── comandos customizados (<recurso>_commands.js)  →  cy.request() para a API
+   └── fixtures (*.json)                              →  payloads e dados esperados
 ```
 
-- **Spec** — descreve o cenário e concentra as asserções (`expect`).
+- **Spec** — descreve o cenário e concentra as asserções (`expect`). Uma spec por recurso
+  da API, com `context` internos separando leitura de escrita.
 - **Comandos customizados** — encapsulam método HTTP, rota e parâmetros. Um teste nunca
-  monta a URL manualmente.
-- **Fixtures** — guardam os valores esperados, mantendo os dados fora do código do teste.
+  monta a URL manualmente. Um arquivo por recurso.
+- **Fixtures** — guardam payloads de escrita e valores esperados, mantendo os dados fora
+  do código do teste.
 
 ## Configuração
 
@@ -118,9 +133,55 @@ de tags usa `--expose grepTags=...` e não mais `--env`.
 O Cypress 15 exige **Node.js `^20.1.0 || ^22.0.0 || >=24.0.0`**, restrição declarada em
 `engines` no `package.json`. Node 14 e 16, usados antes, não são mais suportados.
 
-## Dependências
+## Qualidade de código
 
-Em uso:
+### ESLint
+
+A configuração fica em [eslint.config.mjs](../eslint.config.mjs), no formato *flat
+config* (padrão desde o ESLint 9). São quatro camadas:
+
+1. `js.configs.recommended` — a base do ESLint.
+2. **Contexto Node** para `config/` e arquivos de configuração da raiz.
+3. **Contexto Cypress** (`eslint-plugin-cypress`) para `cypress/`, com os globais `cy`,
+   `Cypress` e `expect` além dos de navegador.
+4. **Contexto de teste** (`eslint-plugin-mocha`) só para as specs.
+
+```bash
+npm run lint       # verifica
+npm run lint:fix   # corrige o que é auto-corrigível
+```
+
+O lint roda no CI **antes** dos testes; se falhar, a suíte nem é executada.
+
+Duas regras do `eslint-plugin-mocha` foram desativadas de propósito:
+
+| Regra | Motivo |
+| --- | --- |
+| `no-mocha-arrows` | Arrow function é o idioma do Cypress — não há `this` a preservar |
+| `no-async-in-sync-tests` | Falso positivo: `cy.request().then()` é um *chainable* da fila de comandos, não uma Promise. Tornar o teste `async` seria justamente o erro |
+
+O valor prático é concreto: a regra `no-undef` detecta exatamente o bug que existia no
+comando `deleteProduct`, que chamava a função inexistente `getUrlAllProducts()`.
+
+### Tipagem dos comandos
+
+[cypress/support/index.d.ts](../cypress/support/index.d.ts) declara os 27 comandos
+customizados em `Cypress.Chainable`. O Cypress carrega o arquivo automaticamente, e o
+[jsconfig.json](../jsconfig.json) faz o editor aplicar essa tipagem também nos arquivos
+`.js` — resultado: autocomplete e assinatura dos parâmetros ao digitar `cy.`.
+
+Ao adicionar, renomear ou remover um comando, atualize o `.d.ts` junto.
+
+### Estilo
+
+[.editorconfig](../.editorconfig) fixa charset, fim de linha e indentação (4 espaços em
+JS, 2 em JSON/YAML) para qualquer editor. As regras de estilo do ESLint espelham o que já
+existia no código — aspas simples, sem ponto e vírgula, sem vírgula pendente.
+
+[.nvmrc](../.nvmrc) fixa o Node 22, usado tanto localmente (`nvm use`) quanto pelo CI via
+`node-version-file`.
+
+## Dependências
 
 | Pacote | Papel |
 | --- | --- |
@@ -128,7 +189,11 @@ Em uso:
 | `@cypress/grep` | Filtro de testes por tag (substitui o `cypress-grep`, depreciado) |
 | `mochawesome` / `mochawesome-report-generator` | Geração dos relatórios HTML e JSON |
 | `mocha` | Peer do mochawesome |
+| `eslint` + `@eslint/js` + `globals` | Análise estática |
+| `eslint-plugin-cypress` | Globais e regras específicas do Cypress |
+| `eslint-plugin-mocha` | Regras para as specs (`.only` esquecido, título duplicado) |
 
-Declaradas mas sem uso no código atual: `dotenv`, `express`, `joi`, `mongodb`,
-`mongoose`, `node-fetch`, `npm-run-all`. São resquícios do projeto de estudo original e
-respondem pela maior parte dos alertas do `npm audit` — podem ser removidas.
+Sete dependências que nenhum arquivo do projeto referenciava — `dotenv`, `express`,
+`joi`, `mongodb`, `mongoose`, `node-fetch` e `npm-run-all` — foram removidas. Eram
+resquícios do projeto de estudo original e respondiam pela maior parte dos alertas do
+`npm audit`, incluindo os dois críticos.

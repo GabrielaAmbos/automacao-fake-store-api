@@ -159,7 +159,8 @@ command, and the data lives in fixtures.
 > The API suite does not run on pull requests because the Fake Store API answers **403**
 > to requests coming from GitHub-hosted runners — their datacenter IP ranges are blocked.
 > The tests are correct and pass locally; running them in CI would leave a permanently red
-> check. Details in [Running and CI](docs/running-and-ci.md).
+> check. A [pre-push hook](.githooks/pre-push) runs lint and the suite locally instead, so
+> the gap is covered at push time. Details in [Running and CI](docs/running-and-ci.md).
 
 ## Documentation
 

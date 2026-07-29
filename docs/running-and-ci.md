@@ -63,6 +63,84 @@ Tests that do not match the filter show up as **pending**, not as failures.
 > ⚠️ If the tag does not exist on any test, the run finishes successfully having executed
 > nothing. Check the available tags in [test-cases.md](test-cases.md#tags).
 
+## The pre-push hook
+
+Because CI cannot run the API suite, nothing on the server side would catch a broken test
+before it reaches `main` — a green pull request only means ESLint passed. The gap is
+covered locally instead.
+
+[.githooks/pre-push](../.githooks/pre-push) runs `npm run lint` and then `npm test` on
+every push. It is installed by the `prepare` npm script, which points `core.hooksPath` at
+the versioned `.githooks/` directory — so `npm i` is all a fresh clone needs. No extra
+dependency, no Husky.
+
+Three details it handles:
+
+| Case | Behaviour |
+| --- | --- |
+| Branch deletion (`git push --delete`) | Skips the suite — there is nothing to test |
+| VS Code terminal | Clears `ELECTRON_RUN_AS_NODE`, which would otherwise make Cypress die on `bad option: --no-sandbox` and block the push for the wrong reason |
+| Deliberate bypass | `git push --no-verify`, for docs-only or work-in-progress pushes |
+
+Cost is roughly 17 seconds per push.
+
+If the hook ever stops firing, check that the path is still set:
+
+```bash
+git config core.hooksPath   # expected: .githooks
+npm run prepare             # re-applies it
+```
+
+## Branch protection
+
+`main` is protected. The rules:
+
+| Rule | Setting |
+| --- | --- |
+| Changes must go through a pull request | Yes, 0 approvals required (a solo maintainer cannot approve their own PR) |
+| Required status check | `ESLint` |
+| Branch must be up to date before merging | Yes |
+| Applies to administrators | **Yes** — the owner cannot bypass it either |
+| Force push / branch deletion | Blocked |
+
+A direct push is rejected outright:
+
+```
+remote: error: GH006: Protected branch update failed for refs/heads/main.
+remote: - Changes must be made through a pull request.
+remote: - Required status check "ESLint" is expected.
+```
+
+`enforce_admins` is on deliberately: the point is to stop an accidental push to `main`,
+and a rule the owner silently bypasses does not do that. If it ever needs to come off in
+an emergency, turn it off under **Settings → Branches**, push, and turn it back on.
+
+## Reviewing a pull request from a fork
+
+The pre-push hook only protects the machine it runs on. An external contributor's clone
+installs their own copy, and they can bypass it — so a fork PR arrives unverified, and CI
+cannot check it either, since it cannot reach the API.
+
+There is no way around that with GitHub-hosted runners. The gate has to be a person:
+
+```bash
+gh pr checkout <number>   # check out the contributor's branch locally
+npm test                  # run the suite against the real API
+```
+
+Only merge once that passes. Two commands, and it is the only thing that actually
+verifies the change.
+
+Worth knowing: GitHub already requires maintainer approval before running workflows on a
+pull request from a first-time contributor, so nobody triggers Actions on this repository
+without being let in.
+
+If forks ever become common, the real fix is a CI-only run backed by `cy.intercept()` and
+recorded responses — see [Known issues](known-issues.md#the-api-blocks-github-runners).
+It would not validate the live API, but it would catch a contributor breaking the suite
+mechanically, which is most of what a review needs. It is deliberately not built yet: the
+repository has no forks, and it would mean a second suite to keep in sync.
+
 ## Reports
 
 The configured reporter is **mochawesome**. Every run writes HTML and JSON to:

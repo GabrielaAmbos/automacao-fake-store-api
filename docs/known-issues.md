@@ -42,6 +42,13 @@ automated runs, by effort:
 What **not** to do: disguise the request origin to get around the protection, or mark the
 job as `continue-on-error` — a check that always fails is a check nobody reads.
 
+A **self-hosted runner is also off the table while the repository is public**: a pull
+request from a fork could execute arbitrary code on that machine.
+
+In the meantime the gap is covered locally by [.githooks/pre-push](../.githooks/pre-push),
+and for fork pull requests by a manual `gh pr checkout` + `npm test` before merging — see
+[Running and CI](running-and-ci.md#reviewing-a-pull-request-from-a-fork).
+
 ## Dependency security
 
 `npm audit` reports **8 residual advisories** (0 critical), all transitive through

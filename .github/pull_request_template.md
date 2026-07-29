@@ -21,3 +21,14 @@
 ## Notes for the reviewer
 
 <!-- Anything worth flagging: a deliberate trade-off, something left out, a caveat. -->
+
+---
+
+<!--
+  MAINTAINER: if this pull request comes from a fork, the author's pre-push hook
+  proves nothing here and CI cannot run the API suite. Verify it yourself before
+  merging:
+
+      gh pr checkout <number>
+      npm test
+-->

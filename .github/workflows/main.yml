@@ -12,33 +12,43 @@ on:
         required: false
         default: 'dev'
       tag:
-        description: 'Selecionar alguma tag, por exemplo: @regressivo / @smoke / @login'
+        description: 'Selecionar alguma tag, por exemplo: @regression / @activities'
         required: false
-        default: '@regressivo'
+        default: '@regression'
   pull_request:
-    branches: [ master]
- 
-    
+    branches: [ main ]
+
+
 env:
   DEFAULT_BROWSER: "chrome"
   DEFAULT_AMB: "dev"
-  DEFAULT_TAG: "@regressivo"
+  DEFAULT_TAG: "@regression"
 
 jobs:
   test:
     name: Cypress run
     runs-on: ubuntu-latest
-    container: cypress/browsers:node14.19.0-chrome100-ff99-edge
     steps:
-      - uses: actions/checkout@v2
-      - name: Cypress run 
-        uses: cypress-io/github-action@v2
-        with: 
-          command: npx cypress run --config-file config/${{github.event.inputs.amb || env.DEFAULT_AMB}}.json --browser ${{github.event.inputs.browser || env.DEFAULT_BROWSER}} --env grepTags=${{github.event.inputs.tag || env.DEFAULT_TAG}}
-      - name: Generate Allure Report
-        uses: simple-elf/allure-report-action@master
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          # @cypress/grep v6 reads its options from --expose (Cypress.env is deprecated in v15)
+          command: >-
+            npx cypress run
+            --config-file config/${{ github.event.inputs.amb || env.DEFAULT_AMB }}.config.js
+            --browser ${{ github.event.inputs.browser || env.DEFAULT_BROWSER }}
+            --expose grepTags=${{ github.event.inputs.tag || env.DEFAULT_TAG }}
+      - name: Upload mochawesome report
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          allure_results: allure-results
-          allure_history: allure-history
-          keep_reports: 20
+          name: mochawesome-report
+          path: cypress/report/mochawesome-report
+          if-no-files-found: ignore
+          retention-days: 20

@@ -68,7 +68,7 @@ become a problem, the way out is swapping the reporter for
 | Item | Situation |
 | --- | --- |
 | `config/dev.config.js` | The only environment that exists; `hlg.config.js` and `prd.config.js`, implied by the workflow's `amb` input, are missing |
-| GitHub Pages | Serves the repository root from `main` through legacy Jekyll. It renders the README, which is not obviously useful given GitHub already does that better |
+| GitHub Pages | Disabled, together with the `static.yml` workflow that fed it — see [Running and CI](running-and-ci.md#github-pages-disabled) |
 | Prettier | Not adopted — style is covered by `.editorconfig` plus the ESLint rules. Adopting it would reformat the entire base at once |
 
 ## Maintenance

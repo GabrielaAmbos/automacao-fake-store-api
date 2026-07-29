@@ -1,105 +1,111 @@
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&size=18&pause=1000&color=DF62F7&width=435&lines=Projeto+de+Automa%C3%A7%C3%A3o+Fake+Store+API)](https://git.io/typing-svg)
+<p align="right">
+  <a href="README.md"><img src="https://flagcdn.com/24x18/us.png" alt="English" title="English"></a>
+  &nbsp;
+  <a href="README.pt-BR.md"><img src="https://flagcdn.com/24x18/br.png" alt="Português (Brasil)" title="Português (Brasil)"></a>
+</p>
+
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&size=18&pause=1000&color=DF62F7&width=435&lines=Fake+Store+API+Test+Automation)](https://git.io/typing-svg)
 
 ![Cypress](https://img.shields.io/badge/Cypress-15.19.0-17202C?logo=cypress&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black)
 ![Node](https://img.shields.io/badge/Node.js-%E2%89%A5%2020-339933?logo=nodedotjs&logoColor=white)
-![Testes](https://img.shields.io/badge/testes-40%20passando-brightgreen)
-![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)
+![Tests](https://img.shields.io/badge/tests-40%20passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-Projeto de automação de testes de **API** para a [Fake Store API](https://fakestoreapi.com),
-escrito em JavaScript com o framework [Cypress](https://www.cypress.io).
+**API** test automation project for the [Fake Store API](https://fakestoreapi.com),
+written in JavaScript with the [Cypress](https://www.cypress.io) framework.
 
-São **40 testes** cobrindo todos os endpoints públicos da API — produtos, carrinhos,
-usuários e autenticação. Não há front-end envolvido: os testes fazem requisições HTTP
-diretas com `cy.request()`, encapsuladas em comandos customizados.
+**40 tests** covering every public endpoint of the API — products, carts, users and
+authentication. No front-end involved: the tests issue HTTP requests directly through
+`cy.request()`, wrapped in custom commands.
 
 ---
 
-## Índice
+## Table of contents
 
-- [Cobertura](#cobertura)
+- [Coverage](#coverage)
 - [Stack](#stack)
 - [Scripts](#scripts)
-- [Como executar](#como-executar)
-- [Filtrar testes por tag](#filtrar-testes-por-tag)
-- [Relatórios](#relatórios)
-- [Estrutura do projeto](#estrutura-do-projeto)
-- [Integração contínua](#integração-contínua)
-- [Documentação](#documentação)
+- [Getting started](#getting-started)
+- [Filtering tests by tag](#filtering-tests-by-tag)
+- [Reports](#reports)
+- [Project structure](#project-structure)
+- [Continuous integration](#continuous-integration)
+- [Documentation](#documentation)
 
-## Cobertura
+## Coverage
 
-| Recurso | Testes | O que é validado |
+| Resource | Tests | What is verified |
 | --- | :---: | --- |
-| **Produtos** | 15 | Listagem, busca por id, `limit`, `sort`, categorias, contrato do objeto, `POST`, `PUT`, `PATCH` e `DELETE` |
-| **Carrinhos** | 12 | Listagem, busca por id e por usuário, `limit`, `sort`, filtro por período, `POST`, `PUT` e `DELETE` |
-| **Usuários** | 9 | Listagem, busca por id, `limit`, `sort`, contrato aninhado, `POST`, `PUT` e `DELETE` |
-| **Autenticação** | 4 | Login válido com token JWT, credencial inválida, senha errada e payload vazio |
+| **Products** | 15 | Listing, lookup by id, `limit`, `sort`, categories, object contract, `POST`, `PUT`, `PATCH` and `DELETE` |
+| **Carts** | 12 | Listing, lookup by id and by user, `limit`, `sort`, date-range filter, `POST`, `PUT` and `DELETE` |
+| **Users** | 9 | Listing, lookup by id, `limit`, `sort`, nested contract, `POST`, `PUT` and `DELETE` |
+| **Authentication** | 4 | Valid login with a JWT, invalid credentials, wrong password and empty payload |
 
-Cada recurso tem uma spec própria em `cypress/e2e/`, com os testes agrupados em
-**Leitura** e **Escrita**.
+Each resource has its own spec under `cypress/e2e/`, with tests grouped into **Leitura**
+(read) and **Escrita** (write).
 
-> A Fake Store API simula a escrita: `POST`, `PUT`, `PATCH` e `DELETE` respondem com
-> sucesso e devolvem o objeto, mas **não persistem** nada. Os testes de escrita validam a
-> resposta — releitura não confirmaria a alteração.
+> The Fake Store API only simulates writes: `POST`, `PUT`, `PATCH` and `DELETE` answer
+> successfully and echo the object back, but **nothing is persisted**. The write tests
+> assert on the response — reading the resource again would confirm nothing.
 
 ## Stack
 
-| Ferramenta | Uso |
+| Tool | Purpose |
 | --- | --- |
-| [Cypress](https://www.cypress.io) 15 | Execução dos testes |
-| [@cypress/grep](https://github.com/cypress-io/cypress/tree/develop/npm/grep) | Filtro de testes por tag |
-| [Mochawesome](https://github.com/adamgruber/mochawesome) | Relatórios em HTML e JSON |
-| [ESLint](https://eslint.org) | Análise estática, com plugins de Cypress e Mocha |
-| GitHub Actions | Pipelines de lint e testes |
+| [Cypress](https://www.cypress.io) 15 | Test runner |
+| [@cypress/grep](https://github.com/cypress-io/cypress/tree/develop/npm/grep) | Filtering tests by tag |
+| [Mochawesome](https://github.com/adamgruber/mochawesome) | HTML and JSON reports |
+| [ESLint](https://eslint.org) | Static analysis, with the Cypress and Mocha plugins |
+| GitHub Actions | Lint and test pipelines |
 
 ## Scripts
 
-| Script | O que faz |
+| Script | What it does |
 | --- | --- |
-| `npm run cy:open` | Abre o Test Runner (modo interativo) |
-| `npm test` | Executa a suíte headless |
-| `npm run test:smoke` | Executa só os testes `@smoke` |
-| `npm run lint` | Roda o ESLint |
-| `npm run lint:fix` | Corrige o que é auto-corrigível |
+| `npm run cy:open` | Opens the Test Runner (interactive mode) |
+| `npm test` | Runs the suite headless |
+| `npm run test:smoke` | Runs only the `@smoke` tests |
+| `npm run lint` | Runs ESLint |
+| `npm run lint:fix` | Applies the auto-fixable ESLint fixes |
 
-## Como executar
+## Getting started
 
-**Requisito:** Node.js 20, 22 ou 24+ (exigência do Cypress 15). O `.nvmrc` fixa a 22 —
-com o [nvm](https://github.com/nvm-sh/nvm) instalado, basta `nvm use`.
+**Requirement:** Node.js 20, 22 or 24+ (Cypress 15 requires it). `.nvmrc` pins 22 — with
+[nvm](https://github.com/nvm-sh/nvm) installed, `nvm use` is enough.
 
 ```bash
-# instalar as dependências
+# install the dependencies
 npm i
 
-# abrir o Test Runner (modo interativo)
+# open the Test Runner (interactive mode)
 npm run cy:open
 
-# executar os testes em modo headless
+# run the tests headless
 npm test
 ```
 
-Nenhuma variável de ambiente, autenticação ou banco de dados é necessária — a Fake Store
-API é pública e a `baseUrl` já vem configurada.
+No environment variable, authentication or database is needed — the Fake Store API is
+public and the `baseUrl` ships configured.
 
 ```bash
-# rodar apenas uma spec
+# run a single spec
 npx cypress run --spec "cypress/e2e/carts/carts.cy.js"
 
-# escolher o navegador
+# pick the browser
 npx cypress run --browser chrome
 
-# usar a configuração de um ambiente específico
+# use a specific environment configuration
 npx cypress run --config-file config/dev.config.js
 ```
 
-> **Rodando no terminal do VS Code?** Ele define `ELECTRON_RUN_AS_NODE=1`, o que faz o
-> Cypress falhar com `bad option: --no-sandbox`. Use
-> `unset ELECTRON_RUN_AS_NODE && npx cypress run` ou um terminal externo.
+> **Running from the VS Code terminal?** It sets `ELECTRON_RUN_AS_NODE=1`, which makes
+> Cypress fail with `bad option: --no-sandbox`. Use
+> `unset ELECTRON_RUN_AS_NODE && npx cypress run`, or an external terminal.
 
-## Filtrar testes por tag
+## Filtering tests by tag
 
-| Tag | Testes |
+| Tag | Tests |
 | --- | :---: |
 | `@regression` | 40 |
 | `@products` | 15 |
@@ -109,64 +115,64 @@ npx cypress run --config-file config/dev.config.js
 | `@auth` | 4 |
 
 ```bash
-npx cypress run --expose grepTags=@smoke              # só os principais
-npx cypress run --expose grepTags="@carts @users"     # @carts OU @users
-npx cypress run --expose grep="categoria"             # por título do teste
+npx cypress run --expose grepTags=@smoke              # only the main ones
+npx cypress run --expose grepTags="@carts @users"     # @carts OR @users
+npx cypress run --expose grep="categoria"             # by test title
 ```
 
-Testes que não casam com o filtro aparecem como **pending**, não como falha.
+Tests that do not match the filter show up as **pending**, not as failures.
 
-## Relatórios
+## Reports
 
-A cada execução, o Mochawesome gera HTML e JSON em
-`cypress/report/mochawesome-report/`, com timestamp no nome — o histórico fica acumulado
-em vez de sobrescrito. No CI, o relatório é publicado como artefato do run.
+On every run Mochawesome writes HTML and JSON to `cypress/report/mochawesome-report/`,
+timestamped — history accumulates instead of being overwritten. In CI the report is
+published as a run artifact.
 
-## Estrutura do projeto
+## Project structure
 
 ```
 ├── config/
-│   ├── base.js                   # configuração compartilhada
-│   └── dev.config.js             # ambiente dev
+│   ├── base.js                   # shared configuration
+│   └── dev.config.js             # dev environment
 ├── cypress/
-│   ├── e2e/                      # specs, uma pasta por recurso
+│   ├── e2e/                      # specs, one folder per resource
 │   │   ├── auth/auth.cy.js
 │   │   ├── carts/carts.cy.js
 │   │   ├── products/products.cy.js
 │   │   └── users/users.cy.js
-│   ├── fixtures/                 # payloads e valores esperados
-│   └── support/                  # comandos customizados, um arquivo por recurso
+│   ├── fixtures/                 # payloads and expected values
+│   └── support/                  # custom commands, one file per resource
 ├── .github/workflows/            # pipelines
-└── cypress.config.js             # configuração padrão
+└── cypress.config.js             # default configuration
 ```
 
-O padrão é simples: **a spec nunca monta URL**. Toda requisição fica em um comando
-customizado, e os dados ficam em fixtures.
+The rule is simple: **a spec never builds a URL**. Every request lives in a custom
+command, and the data lives in fixtures.
 
-## Integração contínua
+## Continuous integration
 
-| Workflow | Quando roda |
+| Workflow | When it runs |
 | --- | --- |
-| **Lint** | A cada pull request para `main` e push na `main` |
-| **Execução automação de testes** | Só manualmente, escolhendo navegador, ambiente e tag |
+| **Lint** | On every pull request to `main` and push to `main` |
+| **Execução automação de testes** | Manually only, choosing browser, environment and tag |
 
-> A suíte de API não roda em pull requests porque a Fake Store API responde **403** a
-> requisições vindas dos runners hospedados do GitHub — as faixas de IP de datacenter são
-> bloqueadas. Os testes estão corretos e passam localmente; rodá-los no CI produziria um
-> check cronicamente vermelho. Detalhes em [Execução e CI](docs/execucao-e-ci.md).
+> The API suite does not run on pull requests because the Fake Store API answers **403**
+> to requests coming from GitHub-hosted runners — their datacenter IP ranges are blocked.
+> The tests are correct and pass locally; running them in CI would leave a permanently red
+> check. Details in [Running and CI](docs/running-and-ci.md).
 
-## Documentação
+## Documentation
 
-Documentação completa na pasta [docs/](docs/README.md):
+Full documentation lives in [docs/](docs/README.md):
 
-| Documento | Conteúdo |
+| Document | Contents |
 | --- | --- |
-| [Arquitetura](docs/arquitetura.md) | Estrutura, configuração e decisões técnicas |
-| [Comandos customizados](docs/comandos-customizados.md) | Referência de todos os `cy.*` do projeto |
-| [Casos de teste](docs/casos-de-teste.md) | O que cada teste valida e as peculiaridades da API |
-| [Execução e CI](docs/execucao-e-ci.md) | Execução local, relatórios e GitHub Actions |
-| [Melhorias conhecidas](docs/melhorias-conhecidas.md) | Pontos em aberto mapeados |
+| [Architecture](docs/architecture.md) | Structure, configuration and technical decisions |
+| [Custom commands](docs/custom-commands.md) | Reference for every `cy.*` in the project |
+| [Test cases](docs/test-cases.md) | What each test verifies, and the API's quirks |
+| [Running and CI](docs/running-and-ci.md) | Local runs, reports and GitHub Actions |
+| [Known issues](docs/known-issues.md) | Mapped open points |
 
-## Licença
+## License
 
 [MIT](LICENSE) © Gabriela Ambos

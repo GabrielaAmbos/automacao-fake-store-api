@@ -121,7 +121,7 @@ unset ELECTRON_RUN_AS_NODE && npx cypress run
 
 ## Estado conhecido
 
-Pontos em aberto mapeados em [docs/melhorias-conhecidas.md](docs/melhorias-conhecidas.md).
+Pontos em aberto mapeados em [docs/known-issues.md](docs/known-issues.md).
 Os mais relevantes ao mexer no código:
 
 - As constantes `TOTAL_PRODUCTS` (20), `TOTAL_CARTS` (7) e `TOTAL_USERS` (10) fixam o

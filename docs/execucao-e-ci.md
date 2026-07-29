@@ -87,32 +87,43 @@ npx marge merged.json
 
 ## GitHub Actions
 
+> ### ⚠️ Por que a suíte não roda em pull requests
+>
+> A Fake Store API responde **403 Forbidden** a requisições vindas dos runners hospedados
+> do GitHub — as faixas de IP de datacenter são bloqueadas upstream. Foi confirmado na
+> primeira execução real do workflow: **40 de 40 testes falharam com 403**, enquanto os
+> mesmos testes passam localmente.
+>
+> Não é o User-Agent: o log mostra que a requisição já sai como
+> `Mozilla/5.0 ... HeadlessChrome/150` e mesmo assim é recusada. É bloqueio por origem.
+>
+> Manter os testes no PR produziria um check cronicamente vermelho que não significa
+> nada — e um check que sempre falha é um check que ninguém lê. Por isso o PR roda só o
+> lint, e a suíte de API ficou sob execução manual.
+>
+> Para rodar contra a API real: `npm test` localmente, ou dispare o workflow a partir de
+> um runner self-hosted cujo IP a API aceite.
+
+### `lint.yml` — Lint
+
+Roda a cada pull request para `main` e a cada push na `main`. Instala com
+`npm ci --ignore-scripts` — o lint não precisa do binário do Cypress, o que deixa o job
+em torno de 10 segundos — e executa `npm run lint`.
+
 ### `main.yml` — Execução automação de testes
 
-Dois jobs em sequência:
+Executa a suíte de API. **Só por `workflow_dispatch`** (manual), pelo motivo acima.
 
-| Job | O que faz |
-| --- | --- |
-| **lint** | `npm ci --ignore-scripts` (pula o download do binário do Cypress, desnecessário aqui) e `npm run lint` |
-| **test** | Roda a suíte — só começa se o lint passar (`needs: lint`) |
+Aceita três entradas na hora de disparar:
 
-Ambos usam `node-version-file: '.nvmrc'`, então a versão do Node fica definida em um só
-lugar.
+| Input | Padrão | Descrição |
+| --- | --- | --- |
+| `browser` | `chrome` | `chrome` ou `electron` |
+| `amb` | `dev` | Ambiente → resolve para `config/{amb}.config.js` |
+| `tag` | `@regression` | Tag para filtrar os testes |
 
-É disparado por:
-
-- **`workflow_dispatch`** (manual), com três entradas:
-
-  | Input | Padrão | Descrição |
-  | --- | --- | --- |
-  | `browser` | `chrome` | `chrome` ou `electron` |
-  | `amb` | `dev` | Ambiente → resolve para `config/{amb}.config.js` |
-  | `tag` | `@regression` | Tag para filtrar os testes |
-
-- **`pull_request`** com destino na branch `main`.
-
-O job de teste roda em `ubuntu-latest` com a action `cypress-io/github-action@v6`, que
-cuida do cache do binário do Cypress. Comando executado:
+O job roda em `ubuntu-latest` com a action `cypress-io/github-action@v6`, que cuida do
+cache do binário do Cypress. Comando executado:
 
 ```bash
 npx cypress run \

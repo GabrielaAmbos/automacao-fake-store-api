@@ -9,6 +9,10 @@ Projeto de automação no endpoint https://fakestoreapi.com utilizando a linguag
     Get Buscar por produto inexistente
     Get Buscar todas as categorias
 
+## Requisitos
+
+Node.js 20, 22 ou 24+ (exigência do Cypress 15).
+
 **Instalar as dependências:**
 ```
 npm i
@@ -21,3 +25,12 @@ npx cypress open
 ```
 npx cypress run
 ```
+**Para filtrar os testes por tag:**
+```
+npx cypress run --expose grepTags=@regression
+```
+
+## Documentação
+
+Documentação completa do projeto na pasta [docs/](docs/README.md) — arquitetura,
+referência dos comandos customizados, casos de teste e pipeline de CI.

@@ -1,0 +1,20 @@
+{
+    "email": "maria.silva@example.com",
+    "username": "mariasilva",
+    "password": "S3nh4Fort3!",
+    "name": {
+        "firstname": "Maria",
+        "lastname": "Silva"
+    },
+    "address": {
+        "city": "Florianópolis",
+        "street": "Rua das Palmeiras",
+        "number": 128,
+        "zipcode": "88010-100",
+        "geolocation": {
+            "lat": "-27.5954",
+            "long": "-48.5480"
+        }
+    },
+    "phone": "1-570-236-7033"
+}

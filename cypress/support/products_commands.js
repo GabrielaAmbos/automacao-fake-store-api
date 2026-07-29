@@ -1,5 +1,5 @@
 
-Cypress.Commands.add('getAllProductos', () => {
+Cypress.Commands.add('getAllProducts', () => {
     cy.request({
         method: 'GET',
         url: '/products'
@@ -37,28 +37,37 @@ Cypress.Commands.add('getAllCategories', () => {
 Cypress.Commands.add('getSpecificCategory', queryString => {
     cy.request({
         method: 'GET',
-        url: '/products/category/' + queryString
+        url: '/products/category/' + encodeURIComponent(queryString)
     })
 })
 
-Cypress.Commands.add('postAddNewProduct', jsonBody  => {
+Cypress.Commands.add('postAddNewProduct', jsonBody => {
     cy.request({
-        method : 'POST',
+        method: 'POST',
         url: '/products',
         body: jsonBody
     })
 })
 
-Cypress.Commands.add('putUpdateProduct', productId  => {
+Cypress.Commands.add('putUpdateProduct', (productId, jsonBody) => {
     cy.request({
-        method : 'PUT',
-        url: 'products/' + productId
+        method: 'PUT',
+        url: '/products/' + productId,
+        body: jsonBody
     })
 })
 
-Cypress.Commands.add('deleteProduct', productId  => {
+Cypress.Commands.add('patchUpdateProduct', (productId, jsonBody) => {
     cy.request({
-        method : 'DELETE',
-        url: getUrlAllProducts() + '/' + productId
+        method: 'PATCH',
+        url: '/products/' + productId,
+        body: jsonBody
+    })
+})
+
+Cypress.Commands.add('deleteProduct', productId => {
+    cy.request({
+        method: 'DELETE',
+        url: '/products/' + productId
     })
 })

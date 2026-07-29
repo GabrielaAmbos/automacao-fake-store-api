@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "module": "commonjs",
+    "checkJs": false,
+    "types": ["cypress"]
+  },
+  "include": [
+    "cypress/**/*.js",
+    "cypress/support/index.d.ts",
+    "config/**/*.js",
+    "cypress.config.js"
+  ],
+  "exclude": ["node_modules", "cypress/report"]
+}

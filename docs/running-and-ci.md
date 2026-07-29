@@ -135,11 +135,21 @@ npx cypress run \
 At the end, the mochawesome report is published as a run artifact
 (`actions/upload-artifact@v4`, 20-day retention), downloadable from the run page.
 
-### `static.yml` — Deploy static content to Pages
+### GitHub Pages
 
-Publishes **the whole repository** (`path: '.'`) to GitHub Pages on every push to `main`,
-or manually. It exists to expose the versioned HTML report, but today it uploads every
-file in the repository, not just the report folder.
+The repository publishes a Pages site at
+<https://gabrielaambos.github.io/automacao-fake-store-api/>, built by GitHub's **legacy
+Jekyll** mode straight from the root of `main`. It renders the README; no workflow is
+involved.
+
+A `static.yml` workflow used to sit alongside it, uploading the whole repository
+(`path: '.'`) on every push. It failed on every run — `upload-pages-artifact@v2` depends
+on the deprecated `upload-artifact@v3`, which GitHub now auto-fails — while contributing
+nothing, since the site was already being served by the legacy build. It was removed.
+
+Publishing the test report through Pages would need a different design anyway:
+`cypress/report/` is gitignored, so no report is ever committed. The `main.yml` workflow
+already uploads the mochawesome report as a run artifact, which covers that need.
 
 ## Troubleshooting
 

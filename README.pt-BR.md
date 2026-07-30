@@ -9,8 +9,10 @@
 ![Cypress](https://img.shields.io/badge/Cypress-15.19.0-17202C?logo=cypress&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black)
 ![Node](https://img.shields.io/badge/Node.js-%E2%89%A5%2020-339933?logo=nodedotjs&logoColor=white)
-![Testes](https://img.shields.io/badge/testes-40%20passando-brightgreen)
+[![Testes](https://img.shields.io/badge/testes-40%20passando-brightgreen)](https://gabrielaambos.github.io/automacao-fake-store-api/)
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)
+
+📊 **[Último relatório de execução](https://gabrielaambos.github.io/automacao-fake-store-api/)**
 
 Projeto de automação de testes de **API** para a [Fake Store API](https://fakestoreapi.com),
 escrito em JavaScript com o framework [Cypress](https://www.cypress.io).
@@ -124,9 +126,26 @@ Testes que não casam com o filtro aparecem como **pending**, não como falha.
 
 ## Relatórios
 
-A cada execução, o Mochawesome gera HTML e JSON em
-`cypress/report/mochawesome-report/`, com timestamp no nome — o histórico fica acumulado
-em vez de sobrescrito. No CI, o relatório é publicado como artefato do run.
+📊 **[Último relatório de execução](https://gabrielaambos.github.io/automacao-fake-store-api/)**
+
+A cada execução, o Mochawesome gera HTML e JSON em `cypress/report/mochawesome-report/` —
+**um arquivo por spec**, com timestamp no nome, então o histórico fica acumulado em vez de
+sobrescrito.
+
+Para consolidar num relatório único e publicar:
+
+```bash
+npm test                # roda a suíte
+npm run report          # junta os arquivos por spec em cypress/report/site/index.html
+npm run report:publish  # envia essa pasta para a branch gh-pages
+```
+
+O relatório publicado é o que o link acima abre. Ele é servido de uma branch órfã
+`gh-pages`, então a `main` nunca carrega os ~800 KB do relatório.
+
+> A suíte roda localmente, não no CI — a Fake Store API bloqueia os runners do GitHub —
+> então o relatório publicado reflete quem rodou `report:publish` por último. É um
+> retrato, não um status ao vivo.
 
 ## Estrutura do projeto
 

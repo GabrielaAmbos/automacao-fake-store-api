@@ -9,8 +9,10 @@
 ![Cypress](https://img.shields.io/badge/Cypress-15.19.0-17202C?logo=cypress&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black)
 ![Node](https://img.shields.io/badge/Node.js-%E2%89%A5%2020-339933?logo=nodedotjs&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-40%20passing-brightgreen)
+[![Tests](https://img.shields.io/badge/tests-40%20passing-brightgreen)](https://gabrielaambos.github.io/automacao-fake-store-api/)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+
+📊 **[Latest execution report](https://gabrielaambos.github.io/automacao-fake-store-api/)**
 
 **API** test automation project for the [Fake Store API](https://fakestoreapi.com),
 written in JavaScript with the [Cypress](https://www.cypress.io) framework.
@@ -124,9 +126,25 @@ Tests that do not match the filter show up as **pending**, not as failures.
 
 ## Reports
 
-On every run Mochawesome writes HTML and JSON to `cypress/report/mochawesome-report/`,
-timestamped — history accumulates instead of being overwritten. In CI the report is
-published as a run artifact.
+📊 **[Latest execution report](https://gabrielaambos.github.io/automacao-fake-store-api/)**
+
+On every run Mochawesome writes HTML and JSON to `cypress/report/mochawesome-report/` —
+**one file per spec**, timestamped, so history accumulates instead of being overwritten.
+
+To consolidate those into a single report and publish it:
+
+```bash
+npm test                # run the suite
+npm run report          # merge the per-spec files into cypress/report/site/index.html
+npm run report:publish  # push that folder to the gh-pages branch
+```
+
+The published report is the one the link above points to. It is served from an orphan
+`gh-pages` branch, so `main` never carries the ~800 KB the report weighs.
+
+> The suite runs locally, not in CI — the Fake Store API blocks GitHub-hosted runners — so
+> the published report reflects whoever ran `report:publish` last. It is a snapshot, not a
+> live status.
 
 ## Project structure
 

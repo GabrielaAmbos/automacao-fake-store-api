@@ -149,18 +149,34 @@ The configured reporter is **mochawesome**. Every run writes HTML and JSON to:
 cypress/report/mochawesome-report/
 ```
 
-With `"overwrite": false` and `"timestamp": "mmddyyyy_HHMMss"`, each run creates a new
-file instead of overwriting the previous one — history accumulates in the folder.
+Mochawesome writes **one file per spec**, not one per run — four specs means four JSON and
+four HTML files. With `"overwrite": false` and `"timestamp": "mmddyyyy_HHMMss"`, each run
+adds a new set instead of replacing the previous one, so history accumulates in the folder.
 
-To merge several JSON files into a single report:
+### Consolidating and publishing
 
 ```bash
-npx mochawesome-merge "cypress/report/mochawesome-report/*.json" > merged.json
-npx marge merged.json
+npm test                # run the suite
+npm run report          # merge the per-spec files into cypress/report/site/index.html
+npm run report:publish  # push that folder to the gh-pages branch
 ```
 
-> `mochawesome-merge` is not among the project's dependencies; install it if you need
-> this step.
+- `report` uses `mochawesome-merge` to combine the per-spec JSON, then `marge`
+  (`mochawesome-report-generator`) to render a single self-contained HTML — `--inline`
+  embeds the assets, so the file works offline and can be emailed as-is.
+- `report:publish` uses the `gh-pages` package, which commits the folder to an orphan
+  `gh-pages` branch. `main` never carries the ~800 KB the report weighs, and the report is
+  not part of the project's history.
+
+The published report is served at
+<https://gabrielaambos.github.io/automacao-fake-store-api/> and linked from both READMEs.
+
+> **It is a snapshot, not a live status.** The suite runs locally — CI cannot reach the
+> API — so the published report reflects whoever ran `report:publish` last. Re-publish
+> after any change worth showing.
+
+`cypress/report/` is gitignored in `main`, so neither the raw reports nor the consolidated
+one are ever committed there.
 
 ## GitHub Actions
 

@@ -29,6 +29,8 @@
     "cy:run": "cypress run",
     "test": "cypress run",
     "test:smoke": "cypress run --expose grepTags=@smoke",
+    "report": "mochawesome-merge \"cypress/report/mochawesome-report/*.json\" > cypress/report/merged.json && marge cypress/report/merged.json --reportDir cypress/report/site --reportFilename index --reportTitle \"Fake Store API — Execution Report\" --reportPageTitle \"Fake Store API — Execution Report\" --charts --inline",
+    "report:publish": "gh-pages --dist cypress/report/site --branch gh-pages --message \"chore: publish execution report\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -39,7 +41,9 @@
     "eslint": "^10.8.0",
     "eslint-plugin-cypress": "^6.4.3",
     "eslint-plugin-mocha": "^12.0.1",
+    "gh-pages": "^6.3.0",
     "globals": "^17.8.0",
+    "mochawesome-merge": "^5.0.0",
     "mocha": "^11.7.6",
     "mochawesome": "^7.1.4",
     "mochawesome-report-generator": "^6.3.2"

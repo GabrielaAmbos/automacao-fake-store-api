@@ -1,0 +1,61 @@
+# Manual-only on purpose.
+#
+# The Fake Store API answers 403 to requests coming from GitHub-hosted runners:
+# their datacenter IP ranges are blocked upstream. The suite is correct — it
+# passes locally — but every request from a hosted runner fails, so running it
+# on pull requests would produce a permanently red check that means nothing.
+#
+# Pull requests are covered by lint.yml. Run the API suite locally with
+# `npm test`, or trigger this workflow from a self-hosted runner whose IP the
+# API accepts.
+name: Execução automação de testes
+
+on:
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Selecionar algum destes browsers: chrome / electron'
+        required: false
+        default: 'chrome'
+      amb:
+        description: 'Selecionar algum destes ambientes: dev / hlg / prd'
+        required: false
+        default: 'dev'
+      tag:
+        description: 'Selecionar alguma tag, por exemplo: @regression / @smoke'
+        required: false
+        default: '@regression'
+
+env:
+  DEFAULT_BROWSER: "chrome"
+  DEFAULT_AMB: "dev"
+  DEFAULT_TAG: "@regression"
+
+jobs:
+  test:
+    name: Cypress run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          # @cypress/grep v6 reads its options from --expose (Cypress.env is deprecated in v15)
+          command: >-
+            npx cypress run
+            --config-file config/${{ github.event.inputs.amb || env.DEFAULT_AMB }}.config.js
+            --browser ${{ github.event.inputs.browser || env.DEFAULT_BROWSER }}
+            --expose grepTags=${{ github.event.inputs.tag || env.DEFAULT_TAG }}
+      - name: Upload mochawesome report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mochawesome-report
+          path: cypress/report/mochawesome-report
+          if-no-files-found: ignore
+          retention-days: 20

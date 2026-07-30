@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Cypress artifacts
+cypress/report/
+**/*.mp4
+**/*.png
+videos
+screenshots
+
+# Editors / OS
+.ideia/
+.DS_Store

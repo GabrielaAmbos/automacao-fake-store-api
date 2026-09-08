@@ -1,135 +1,144 @@
-# Known issues
+# Estado conhecido
 
-A survey of the project's current state — a map of what exists, to guide the next steps.
+Um levantamento do estado atual do projeto — um mapa do que existe, para guiar os
+próximos passos.
 
-## Suite fragilities
+## Fragilidades da suíte
 
-### Hardcoded counts
+### Contagens fixas no código
 
-Three tests assert the exact size of the collections (20 products, 7 carts, 10 users)
-through the `TOTAL_PRODUCTS`, `TOTAL_CARTS` and `TOTAL_USERS` constants. That is
-deliberate — it catches changes to the API's catalogue — but it breaks if the Fake Store
-alters its dataset. If it turns into noise, swap it for
+Três testes verificam o tamanho exato das coleções (20 produtos, 7 carrinhos, 10
+usuários) através das constantes `TOTAL_PRODUCTS`, `TOTAL_CARTS` e `TOTAL_USERS`. Isso é
+proposital — pega mudanças no catálogo da API — mas quebra se a Fake Store alterar sua
+massa de dados. Se isso virar ruído, trocar por
 `expect(response.body).to.not.be.empty`.
 
-### The cart date filter is not really verified
+### O filtro de datas do carrinho não é verificado de verdade
 
-`GET /carts?startdate=2019-12-10&enddate=2020-10-10` returns all **7** carts, ignoring
-the range. The test checks status and type only, because asserting the filtering would
-fail against the API's real behaviour. If the API is fixed, the test should be
-strengthened.
+`GET /carts?startdate=2019-12-10&enddate=2020-10-10` devolve os **7** carrinhos,
+ignorando o intervalo. O teste checa apenas status e tipo, porque asserir a filtragem
+falharia contra o comportamento real da API. Se a API for corrigida, o teste deve ser
+reforçado.
 
-### Fixed ids in the write tests
+### Ids fixos nos testes de escrita
 
-`PUT`, `PATCH` and `DELETE` use fixed ids (6, 7, 2, 3). Since the API persists nothing,
-there is no side effect between runs — but the ids do have to exist in the dataset.
+`PUT`, `PATCH` e `DELETE` usam ids fixos (6, 7, 2, 3). Como a API não persiste nada, não
+há efeito colateral entre execuções — mas os ids precisam existir no dataset.
 
-## The API blocks GitHub runners
+## A API bloqueia os runners do GitHub
 
-The Fake Store API answers **403 Forbidden** to requests coming from GitHub-hosted
-runners. Confirmed on the workflow's first real run: 40 of 40 tests failed with 403, with
-the User-Agent already presenting itself as Chrome — meaning the block is on the
-datacenter IP ranges, not on the client.
+A Fake Store API responde **403 Forbidden** a requisições vindas dos runners hospedados
+do GitHub. Confirmado na primeira execução real do workflow: 40 de 40 testes falharam
+com 403, com o User-Agent já se apresentando como Chrome — ou seja, o bloqueio é nas
+faixas de IP de datacenter, não no cliente.
 
-The API suite moved to manual dispatch and pull requests run lint only. Routes back to
-automated runs, by effort:
+A suíte de API foi para disparo manual e pull requests rodam só o lint. Caminhos de
+volta para execução automatizada, por esforço:
 
-1. **Self-hosted runner** — keeps the tests against the real API; needs infrastructure.
-2. **Mock with `cy.intercept()`** and recorded responses — runs anywhere, but turns into
-   contract testing against frozen data rather than the live API.
-3. **Switch targets** to a public API that does not block datacenter ranges.
+1. **Runner self-hosted** — mantém os testes contra a API real; precisa de
+   infraestrutura.
+2. **Mock com `cy.intercept()`** e respostas gravadas — roda em qualquer lugar, mas vira
+   teste de contrato contra dados congelados, não contra a API ao vivo.
+3. **Trocar de alvo** para uma API pública que não bloqueia faixas de datacenter.
 
-What **not** to do: disguise the request origin to get around the protection, or mark the
-job as `continue-on-error` — a check that always fails is a check nobody reads.
+O que **não** fazer: disfarçar a origem da requisição para contornar a proteção, ou
+marcar o job como `continue-on-error` — um check que sempre falha é um check que
+ninguém lê.
 
-A **self-hosted runner is also off the table while the repository is public**: a pull
-request from a fork could execute arbitrary code on that machine.
+Um **runner self-hosted também está fora de cogitação enquanto o repositório for
+público**: um pull request de um fork poderia executar código arbitrário nessa máquina.
 
-In the meantime the gap is covered locally by [.githooks/pre-push](../.githooks/pre-push),
-and for fork pull requests by a manual `gh pr checkout` + `npm test` before merging — see
-[Running and CI](running-and-ci.md#reviewing-a-pull-request-from-a-fork).
+Enquanto isso, a lacuna é coberta localmente pelo
+[.githooks/pre-push](../.githooks/pre-push), e para pull requests de fork por um `gh pr
+checkout` + `npm test` manual antes do merge — ver
+[Execução e CI](running-and-ci.md#revisando-um-pull-request-de-um-fork).
 
-## Dependency security
+## Segurança de dependências
 
-`npm audit` reports **8 residual advisories** (0 critical), all transitive through
-`mocha`/`mochawesome` and confined to report-generation devDependencies.
+O `npm audit` reporta **8 alertas residuais** (0 críticos), todos transitivos de
+`mocha`/`mochawesome` e confinados às devDependencies de geração de relatório.
 
-npm's `fixAvailable` proposes a **downgrade** — `mocha@11.3` (older than the installed
-one) and `mochawesome@1.5.5` — which would be a large regression to address a theoretical
-risk in a reporting tool. **Do not run `npm audit fix --force` here.** If the advisories
-become a problem, the way out is swapping the reporter for
-`cypress-mochawesome-reporter`, maintained specifically for Cypress.
+O `fixAvailable` do npm propõe correções que são, na verdade, **upgrades com breaking
+change** — `mocha@12.0.0` e `mochawesome@8.0.1` — não um downgrade. Trocar de major é um
+risco de regressão maior do que os alertas em si, que vivem só na ferramenta de
+relatório. **Não rode `npm audit fix --force` aqui.** Se os alertas virarem um problema
+de verdade, o caminho é trocar o reporter por `cypress-mochawesome-reporter`, mantido
+especificamente para o Cypress.
 
-## Coverage
+## Cobertura
 
-- **Schema-based contract validation**: the contract assertions are manual
-  (`to.have.all.keys` plus type checks). A schema per resource would make the tests more
-  declarative.
-- **The JWT is never reused**: the login test validates the token's shape, but no test
-  uses it on an authenticated request — the Fake Store API does not require auth on the
-  other endpoints.
-- **`PATCH` only exists for products**: carts and users accept it too, untested.
+- **Validação de contrato baseada em schema**: as asserções de contrato são manuais
+  (`to.have.all.keys` mais checagem de tipo). Um schema por recurso deixaria os testes
+  mais declarativos.
+- **O JWT nunca é reutilizado**: o teste de login valida o formato do token, mas nenhum
+  teste o usa numa requisição autenticada — a Fake Store API não exige autenticação nos
+  demais endpoints.
+- **`PATCH` só existe para produtos**: carrinhos e usuários também aceitam, mas não é
+  testado.
 
-## Configuration and CI
+## Configuração e CI
 
-| Item | Situation |
+| Item | Situação |
 | --- | --- |
-| `config/dev.config.js` | The only environment that exists; `hlg.config.js` and `prd.config.js`, implied by the workflow's `amb` input, are missing |
-| GitHub Pages | Disabled, together with the `static.yml` workflow that fed it — see [Running and CI](running-and-ci.md#github-pages-disabled) |
-| Prettier | Not adopted — style is covered by `.editorconfig` plus the ESLint rules. Adopting it would reformat the entire base at once |
+| `config/dev.config.js` | O único ambiente que existe; `hlg.config.js` e `prd.config.js`, sugeridos pelo input `amb` do workflow, estão faltando |
+| GitHub Pages | Desativado, junto com o workflow `static.yml` que o alimentava — ver [Execução e CI](running-and-ci.md#github-pages-desativado) |
+| Prettier | Não adotado — o estilo é coberto pelo `.editorconfig` mais as regras do ESLint. Adotá-lo reformataria a base inteira de uma vez |
 
-## Maintenance
+## Manutenção
 
-- **Idle fixtures**: `all_electronics_products.json` and `all_jewelery_products.json` are
-  unused. That was a deliberate call — the category test asserts that *every* returned
-  item belongs to the requested category, which does not break when the catalogue changes.
-  Both files can be removed.
-- **Bilingual README**: `README.md` (English) and `README.pt-BR.md` (Portuguese) must be
-  kept in sync by hand. Any change to one belongs in the other.
+- **Fixtures ociosas**: `all_electronics_products.json` e `all_jewelery_products.json`
+  não são usadas. Foi uma decisão deliberada — o teste de categoria valida que *todo*
+  item retornado pertence à categoria pedida, o que não quebra quando o catálogo muda.
+  Os dois arquivos podem ser removidos.
+- **README bilíngue**: `README.md` (inglês) e `README.pt-BR.md` (português) precisam ser
+  mantidos sincronizados manualmente. Qualquer mudança em um pertence ao outro.
 
-## Resolved
+## Resolvido
 
-### While standardising (tooling and conventions)
+### Durante a padronização (ferramental e convenções)
 
-- ~~No linter in the project~~ → ESLint with `eslint-plugin-cypress` and
-  `eslint-plugin-mocha`, running in CI on every pull request.
-- ~~7 idle dependencies, 2 critical vulnerabilities~~ → removed; `npm audit` dropped from
-  22 advisories (2 critical) to 8 (none critical).
-- ~~No autocomplete for the custom commands~~ → `cypress/support/index.d.ts` typing all 27
-  commands, plus `jsconfig.json`.
-- ~~`package.json` pointed at the wrong repository~~ (`GabrielaAmbos/cypress`) → fixed,
-  with `bugs`, `keywords` and `private: true`.
-- ~~`main: index.js` referenced a nonexistent file~~ → removed.
-- ~~`commands.js` was 100% comments and still imported~~ → removed.
-- ~~npm scripts carried a redundant `npx`~~ → `cypress` resolves straight from `.bin`;
-  added `test`, `test:smoke`, `lint` and `lint:fix`.
-- ~~The Node version was repeated in the workflow~~ → centralised in `.nvmrc`.
-- ~~No shared file style~~ → `.editorconfig`.
+- ~~Nenhum linter no projeto~~ → ESLint com `eslint-plugin-cypress` e
+  `eslint-plugin-mocha`, rodando no CI em todo pull request.
+- ~~7 dependências ociosas, 2 vulnerabilidades críticas~~ → removidas; o `npm audit`
+  caiu de 22 alertas (2 críticos) para 8 (nenhum crítico).
+- ~~Sem autocomplete para os comandos customizados~~ →
+  `cypress/support/index.d.ts` tipando os 27 comandos, mais `jsconfig.json`.
+- ~~`package.json` apontava para o repositório errado~~ (`GabrielaAmbos/cypress`) →
+  corrigido, com `bugs`, `keywords` e `private: true`.
+- ~~`main: index.js` referenciava um arquivo inexistente~~ → removido.
+- ~~`commands.js` era 100% comentário e ainda assim importado~~ → removido.
+- ~~Scripts do npm carregavam um `npx` redundante~~ → `cypress` resolve direto do
+  `.bin`; adicionados `test`, `test:smoke`, `lint` e `lint:fix`.
+- ~~A versão do Node era repetida no workflow~~ → centralizada em `.nvmrc`.
+- ~~Sem estilo de arquivo compartilhado~~ → `.editorconfig`.
 
-### While growing coverage (products → the whole API)
+### Durante a expansão de cobertura (produtos → toda a API)
 
-- ~~`deleteProduct` called `getUrlAllProducts()`, a nonexistent function~~ → fixed to
-  `'/products/' + productId`.
-- ~~`putUpdateProduct` sent a `PUT` with no body~~ → now takes the payload as a parameter.
-- ~~The "Buscar por uma categoria" test was commented out and missing its `it(`~~ →
-  rewritten and active, alongside the nonexistent-category one.
-- ~~`getAllProductos` mixed Portuguese and English~~ → renamed to `getAllProducts`.
-- ~~`getSpecificCategory` did not encode the URL~~ → uses `encodeURIComponent`, which made
-  the `men's clothing` test possible.
-- ~~The categories test compared by index, depending on the API's ordering~~ → switched to
-  `to.have.members`, which ignores order.
-- ~~6 of the 9 product commands had no test~~ → all covered.
+- ~~`deleteProduct` chamava `getUrlAllProducts()`, uma função inexistente~~ → corrigido
+  para `'/products/' + productId`.
+- ~~`putUpdateProduct` enviava um `PUT` sem corpo~~ → agora recebe o payload como
+  parâmetro.
+- ~~O teste "Buscar por uma categoria" estava comentado e sem o `it(`~~ → reescrito e
+  ativo, junto com o de categoria inexistente.
+- ~~`getAllProductos` misturava português e inglês~~ → renomeado para `getAllProducts`.
+- ~~`getSpecificCategory` não codificava a URL~~ → usa `encodeURIComponent`, o que
+  viabilizou o teste de `men's clothing`.
+- ~~O teste de categorias comparava por índice, dependendo da ordenação da API~~ →
+  trocado por `to.have.members`, que ignora a ordem.
+- ~~6 dos 9 comandos de produto não tinham teste~~ → todos cobertos.
 
-### While migrating to Cypress 15
+### Durante a migração para o Cypress 15
 
-- ~~`cypress-grep` was never registered~~ → replaced with `@cypress/grep` and registered.
-- ~~The CI default tag (`@regressivo`) matched nothing in the specs~~ → changed to
+- ~~`cypress-grep` nunca era registrado~~ → substituído por `@cypress/grep` e
+  registrado.
+- ~~A tag padrão do CI (`@regressivo`) não casava com nada nas specs~~ → mudada para
   `@regression`.
-- ~~The PR trigger pointed at `master`~~ → fixed to `main`.
-- ~~An Allure step with no `allure-results`~~ → replaced by uploading the mochawesome
-  report as an artifact.
-- ~~Legacy Cypress 9 layout~~ → migrated to `cypress.config.js`, `cypress/e2e/` and
+- ~~O trigger de PR apontava para `master`~~ → corrigido para `main`.
+- ~~Um step do Allure sem `allure-results`~~ → substituído pela publicação do
+  relatório mochawesome como artefato.
+- ~~Layout legado do Cypress 9~~ → migrado para `cypress.config.js`, `cypress/e2e/` e
   `cypress/support/e2e.js`.
-- ~~`cypress.json` and `config/dev.json` were duplicates~~ → configuration unified in
+- ~~`cypress.json` e `config/dev.json` eram duplicados~~ → configuração unificada em
   `config/base.js`.
-- ~~`node_modules/` was version-controlled (11,851 files)~~ → untracked and ignored.
+- ~~`node_modules/` estava versionado (11.851 arquivos)~~ → removido do controle de
+  versão e ignorado.

@@ -1,109 +1,110 @@
-# Running and CI
+# Execução e CI
 
-## Prerequisites
+## Pré-requisitos
 
-- **Node.js `^20.1.0 || ^22.0.0 || >=24.0.0`** — required by Cypress 15.
-  [.nvmrc](../.nvmrc) pins 22; with `nvm` installed, `nvm use` is enough.
-- Internet access — the tests call the public `https://fakestoreapi.com` API.
+- **Node.js `^20.1.0 || ^22.0.0 || >=24.0.0`** — exigência do Cypress 15.
+  [.nvmrc](../.nvmrc) fixa a 22; com `nvm` instalado, `nvm use` já resolve.
+- Acesso à internet — os testes chamam a API pública `https://fakestoreapi.com`.
 
-## Available scripts
+## Scripts disponíveis
 
-| Script | What it does |
+| Script | O que faz |
 | --- | --- |
-| `npm run cy:open` | Opens the Test Runner (interactive mode) |
-| `npm run cy:run` | Runs the suite headless |
-| `npm test` | Alias of `cy:run` — the entry point CI and other tools expect |
-| `npm run test:smoke` | Runs only the `@smoke` tests |
-| `npm run lint` | Runs ESLint |
-| `npm run lint:fix` | Runs ESLint applying the auto-fixable fixes |
+| `npm run cy:open` | Abre o Test Runner (modo interativo) |
+| `npm run cy:run` | Executa a suíte headless |
+| `npm test` | Alias de `cy:run` — o ponto de entrada que o CI e outras ferramentas esperam |
+| `npm run test:smoke` | Executa só os testes `@smoke` |
+| `npm run lint` | Roda o ESLint |
+| `npm run lint:fix` | Roda o ESLint aplicando as correções automáticas |
 
-## Running locally
+## Executando localmente
 
 ```bash
-npm i            # install the dependencies
-npm run cy:open  # open the Test Runner (interactive mode)
-npm test         # run headless
+npm i            # instalar as dependências
+npm run cy:open  # abrir o Test Runner (modo interativo)
+npm test         # executar em modo headless
 ```
 
-### Useful variations
+### Variações úteis
 
 ```bash
-# run a single spec
+# rodar apenas uma spec
 npx cypress run --spec "cypress/e2e/products/products.cy.js"
 
-# pick the browser
+# escolher o navegador
 npx cypress run --browser chrome
 
-# use a specific environment configuration
+# usar a configuração de um ambiente específico
 npx cypress run --config-file config/dev.config.js
 ```
 
-### Filtering tests by tag
+### Filtrando testes por tag
 
-`@cypress/grep` is registered in [cypress/support/e2e.js](../cypress/support/e2e.js) and
-in `setupNodeEvents`. Options are passed with **`--expose`** (in Cypress 15, `--env` is no
-longer the recommended channel):
+O `@cypress/grep` é registrado em
+[cypress/support/e2e.js](../cypress/support/e2e.js) e no `setupNodeEvents`. As opções
+são passadas com **`--expose`** (no Cypress 15, `--env` deixou de ser o canal
+recomendado):
 
 ```bash
-# only the tests tagged @regression
+# só os testes marcados @regression
 npx cypress run --expose grepTags=@regression
 
-# @regression OR @activities
+# @regression OU @activities
 npx cypress run --expose grepTags="@regression @activities"
 
-# @regression AND @activities
+# @regression E @activities
 npx cypress run --expose grepTags="@regression+@activities"
 
-# filter by test title
+# filtrar pelo título do teste
 npx cypress run --expose grep="categorias"
 ```
 
-Tests that do not match the filter show up as **pending**, not as failures.
+Testes que não casam com o filtro aparecem como **pending**, não como falha.
 
-> ⚠️ If the tag does not exist on any test, the run finishes successfully having executed
-> nothing. Check the available tags in [test-cases.md](test-cases.md#tags).
+> ⚠️ Se a tag não existir em nenhum teste, a execução termina com sucesso sem rodar
+> nada. Confira as tags disponíveis em [test-cases.md](test-cases.md#tags).
 
-## The pre-push hook
+## O hook de pre-push
 
-Because CI cannot run the API suite, nothing on the server side would catch a broken test
-before it reaches `main` — a green pull request only means ESLint passed. The gap is
-covered locally instead.
+Como o CI não consegue rodar a suíte de API, nada do lado do servidor pegaria um teste
+quebrado antes de chegar na `main` — um pull request verde só significa que o ESLint
+passou. A lacuna é coberta localmente.
 
-[.githooks/pre-push](../.githooks/pre-push) runs `npm run lint` and then `npm test` on
-every push. It is installed by the `prepare` npm script, which points `core.hooksPath` at
-the versioned `.githooks/` directory — so `npm i` is all a fresh clone needs. No extra
-dependency, no Husky.
+O [.githooks/pre-push](../.githooks/pre-push) roda `npm run lint` e depois `npm test` a
+cada push. Ele é instalado pelo script npm `prepare`, que aponta `core.hooksPath` para o
+diretório versionado `.githooks/` — então `npm i` já é suficiente num clone novo. Sem
+dependência extra, sem Husky.
 
-Three details it handles:
+Três detalhes que ele trata:
 
-| Case | Behaviour |
+| Caso | Comportamento |
 | --- | --- |
-| Branch deletion (`git push --delete`) | Skips the suite — there is nothing to test |
-| VS Code terminal | Clears `ELECTRON_RUN_AS_NODE`, which would otherwise make Cypress die on `bad option: --no-sandbox` and block the push for the wrong reason |
-| Deliberate bypass | `git push --no-verify`, for docs-only or work-in-progress pushes |
+| Exclusão de branch (`git push --delete`) | Pula a suíte — não há nada para testar |
+| Terminal do VS Code | Limpa `ELECTRON_RUN_AS_NODE`, que do contrário faria o Cypress morrer com `bad option: --no-sandbox` e bloquearia o push pelo motivo errado |
+| Bypass deliberado | `git push --no-verify`, para pushes só de documentação ou trabalho em andamento |
 
-Cost is roughly 17 seconds per push.
+O custo é de aproximadamente 17 segundos por push.
 
-If the hook ever stops firing, check that the path is still set:
+Se o hook parar de disparar, confira se o path ainda está configurado:
 
 ```bash
-git config core.hooksPath   # expected: .githooks
-npm run prepare             # re-applies it
+git config core.hooksPath   # esperado: .githooks
+npm run prepare             # reaplica a configuração
 ```
 
-## Branch protection
+## Proteção de branch
 
-`main` is protected. The rules:
+A `main` é protegida. As regras:
 
-| Rule | Setting |
+| Regra | Configuração |
 | --- | --- |
-| Changes must go through a pull request | Yes, 0 approvals required (a solo maintainer cannot approve their own PR) |
-| Required status check | `ESLint` |
-| Branch must be up to date before merging | Yes |
-| Applies to administrators | **Yes** — the owner cannot bypass it either |
-| Force push / branch deletion | Blocked |
+| Mudanças precisam passar por pull request | Sim, 0 aprovações exigidas (uma mantenedora solo não consegue aprovar o próprio PR) |
+| Status check obrigatório | `ESLint` |
+| Branch precisa estar atualizada antes do merge | Sim |
+| Vale para administradores | **Sim** — nem a dona do repositório pode contornar |
+| Force push / exclusão de branch | Bloqueado |
 
-A direct push is rejected outright:
+Um push direto é rejeitado:
 
 ```
 remote: error: GH006: Protected branch update failed for refs/heads/main.
@@ -111,113 +112,120 @@ remote: - Changes must be made through a pull request.
 remote: - Required status check "ESLint" is expected.
 ```
 
-`enforce_admins` is on deliberately: the point is to stop an accidental push to `main`,
-and a rule the owner silently bypasses does not do that. If it ever needs to come off in
-an emergency, turn it off under **Settings → Branches**, push, and turn it back on.
+O `enforce_admins` está ligado de propósito: o objetivo é impedir um push acidental na
+`main`, e uma regra que a própria dona contorna silenciosamente não cumpre isso. Se
+precisar cair numa emergência, é só desligar em **Settings → Branches**, dar o push e
+religar depois.
 
-## Reviewing a pull request from a fork
+## Revisando um pull request de um fork
 
-The pre-push hook only protects the machine it runs on. An external contributor's clone
-installs their own copy, and they can bypass it — so a fork PR arrives unverified, and CI
-cannot check it either, since it cannot reach the API.
+O hook de pre-push só protege a máquina onde ele roda. O clone de uma pessoa contribuidora
+externa instala sua própria cópia e pode contorná-lo — então um PR de fork chega sem
+verificação, e o CI também não consegue checar, já que não alcança a API.
 
-There is no way around that with GitHub-hosted runners. The gate has to be a person:
+Não há como contornar isso com runners hospedados do GitHub. O portão precisa ser uma
+pessoa:
 
 ```bash
-gh pr checkout <number>   # check out the contributor's branch locally
-npm test                  # run the suite against the real API
+gh pr checkout <número>   # baixar a branch da pessoa contribuidora localmente
+npm test                  # rodar a suíte contra a API real
 ```
 
-Only merge once that passes. Two commands, and it is the only thing that actually
-verifies the change.
+Só faça o merge depois que isso passar. Dois comandos, e é a única coisa que realmente
+verifica a mudança.
 
-Worth knowing: GitHub already requires maintainer approval before running workflows on a
-pull request from a first-time contributor, so nobody triggers Actions on this repository
-without being let in.
+Vale saber: o GitHub já exige aprovação de uma pessoa mantenedora antes de rodar
+workflows num pull request de quem contribui pela primeira vez, então ninguém dispara
+Actions neste repositório sem antes ser autorizado.
 
-If forks ever become common, the real fix is a CI-only run backed by `cy.intercept()` and
-recorded responses — see [Known issues](known-issues.md#the-api-blocks-github-runners).
-It would not validate the live API, but it would catch a contributor breaking the suite
-mechanically, which is most of what a review needs. It is deliberately not built yet: the
-repository has no forks, and it would mean a second suite to keep in sync.
+Se forks se tornarem comuns, a solução de verdade é uma execução exclusiva de CI apoiada
+em `cy.intercept()` e respostas gravadas — ver
+[Estado conhecido](known-issues.md#a-api-bloqueia-os-runners-do-github). Isso não
+validaria a API ao vivo, mas pegaria uma pessoa contribuidora quebrando a suíte
+mecanicamente, que é a maior parte do que uma revisão precisa. Está deliberadamente não
+construído ainda: o repositório não tem forks, e significaria uma segunda suíte para
+manter sincronizada.
 
-## Reports
+## Relatórios
 
-The configured reporter is **mochawesome**. Every run writes HTML and JSON to:
+O reporter configurado é o **mochawesome**. Toda execução grava HTML e JSON em:
 
 ```
 cypress/report/mochawesome-report/
 ```
 
-Mochawesome writes **one file per spec**, not one per run — four specs means four JSON and
-four HTML files. With `"overwrite": false` and `"timestamp": "mmddyyyy_HHMMss"`, each run
-adds a new set instead of replacing the previous one, so history accumulates in the folder.
+O mochawesome grava **um arquivo por spec**, não um por execução — quatro specs geram
+quatro JSON e quatro HTML. Com `"overwrite": false` e `"timestamp": "mmddyyyy_HHMMss"`,
+cada execução soma um novo conjunto em vez de substituir o anterior, então o histórico
+se acumula na pasta.
 
-### Consolidating and publishing
+### Consolidando e publicando
 
 ```bash
-npm test                # run the suite
-npm run report          # merge the per-spec files into cypress/report/site/index.html
-npm run report:publish  # push that folder to the gh-pages branch
+npm test                # roda a suíte
+npm run report          # junta os arquivos por spec em cypress/report/site/index.html
+npm run report:publish  # envia essa pasta para a branch gh-pages
 ```
 
-- `report` uses `mochawesome-merge` to combine the per-spec JSON, then `marge`
-  (`mochawesome-report-generator`) to render a single self-contained HTML — `--inline`
-  embeds the assets, so the file works offline and can be emailed as-is.
-- `report:publish` uses the `gh-pages` package, which commits the folder to an orphan
-  `gh-pages` branch. `main` never carries the ~800 KB the report weighs, and the report is
-  not part of the project's history.
+- `report` usa o `mochawesome-merge` para combinar o JSON de cada spec, depois o `marge`
+  (`mochawesome-report-generator`) para renderizar um único HTML autocontido — o
+  `--inline` embute os assets, então o arquivo funciona offline e pode ser enviado por
+  e-mail como está.
+- `report:publish` usa o pacote `gh-pages`, que envia a pasta para uma branch órfã
+  `gh-pages`. A `main` nunca carrega os ~800 KB que o relatório pesa, e o relatório não
+  faz parte do histórico do projeto.
 
-The published report is served at
-<https://gabrielaambos.github.io/automacao-fake-store-api/> and linked from both READMEs.
+O relatório publicado fica em
+<https://gabrielaambos.github.io/automacao-fake-store-api/> e está linkado nos dois
+READMEs.
 
-> **It is a snapshot, not a live status.** The suite runs locally — CI cannot reach the
-> API — so the published report reflects whoever ran `report:publish` last. Re-publish
-> after any change worth showing.
+> **É um retrato, não um status ao vivo.** A suíte roda localmente — o CI não alcança a
+> API — então o relatório publicado reflete quem rodou `report:publish` por último.
+> Republique após qualquer mudança que valha mostrar.
 
-`cypress/report/` is gitignored in `main`, so neither the raw reports nor the consolidated
-one are ever committed there.
+`cypress/report/` está no `.gitignore` na `main`, então nem os relatórios brutos nem o
+consolidado são versionados.
 
 ## GitHub Actions
 
-> ### ⚠️ Why the suite does not run on pull requests
+> ### ⚠️ Por que a suíte não roda em pull requests
 >
-> The Fake Store API answers **403 Forbidden** to requests coming from GitHub-hosted
-> runners — their datacenter IP ranges are blocked upstream. This was confirmed on the
-> workflow's first real run: **40 of 40 tests failed with 403**, while the same tests pass
-> locally.
+> A Fake Store API responde **403 Forbidden** a requisições vindas dos runners
+> hospedados do GitHub — as faixas de IP de datacenter são bloqueadas na origem. Isso foi
+> confirmado na primeira execução real do workflow: **40 de 40 testes falharam com
+> 403**, enquanto os mesmos testes passam localmente.
 >
-> It is not the User-Agent: the log shows the request already going out as
-> `Mozilla/5.0 ... HeadlessChrome/150` and still being refused. The block is on the
-> request origin.
+> Não é o User-Agent: o log mostra a requisição já saindo como
+> `Mozilla/5.0 ... HeadlessChrome/150` e mesmo assim sendo recusada. O bloqueio é na
+> origem da requisição.
 >
-> Keeping the tests on pull requests would leave a permanently red check that means
-> nothing — and a check that always fails is a check nobody reads. So pull requests run
-> lint only, and the API suite moved to manual dispatch.
+> Manter os testes em pull requests deixaria um check permanentemente vermelho que não
+> significa nada — e um check que sempre falha é um check que ninguém lê. Por isso pull
+> requests rodam só o lint, e a suíte de API foi para disparo manual.
 >
-> To run against the real API: `npm test` locally, or trigger the workflow from a
-> self-hosted runner whose IP the API accepts.
+> Para rodar contra a API real: `npm test` localmente, ou disparar o workflow a partir
+> de um runner self-hosted cujo IP a API aceite.
 
 ### `lint.yml` — Lint
 
-Runs on every pull request to `main` and every push to `main`. Installs with
-`npm ci --ignore-scripts` — linting does not need the Cypress binary, which keeps the job
-around 10 seconds — and runs `npm run lint`.
+Roda em todo pull request para a `main` e todo push na `main`. Instala com
+`npm ci --ignore-scripts` — lint não precisa do binário do Cypress, o que mantém o job
+em torno de 10 segundos — e roda `npm run lint`.
 
 ### `main.yml` — Execução automação de testes
 
-Runs the API suite. **Through `workflow_dispatch` only** (manual), for the reason above.
+Roda a suíte de API. **Só via `workflow_dispatch`** (manual), pelo motivo acima.
 
-It takes three inputs at dispatch time:
+Recebe três inputs no momento do disparo:
 
-| Input | Default | Description |
+| Input | Padrão | Descrição |
 | --- | --- | --- |
-| `browser` | `chrome` | `chrome` or `electron` |
-| `amb` | `dev` | Environment → resolves to `config/{amb}.config.js` |
-| `tag` | `@regression` | Tag used to filter the tests |
+| `browser` | `chrome` | `chrome` ou `electron` |
+| `amb` | `dev` | Ambiente → resolve para `config/{amb}.config.js` |
+| `tag` | `@regression` | Tag usada para filtrar os testes |
 
-The job runs on `ubuntu-latest` with the `cypress-io/github-action@v6` action, which takes
-care of caching the Cypress binary. Command executed:
+O job roda em `ubuntu-latest` com a action `cypress-io/github-action@v6`, que cuida do
+cache do binário do Cypress. Comando executado:
 
 ```bash
 npx cypress run \
@@ -226,45 +234,49 @@ npx cypress run \
   --expose grepTags=${tag}
 ```
 
-At the end, the mochawesome report is published as a run artifact
-(`actions/upload-artifact@v4`, 20-day retention), downloadable from the run page.
+Ao final, o relatório do mochawesome é publicado como artefato da execução
+(`actions/upload-artifact@v4`, retenção de 20 dias), baixável pela página da execução.
 
-### GitHub Pages (disabled)
+### GitHub Pages (desativado)
 
-The repository used to publish a Pages site, built by GitHub's legacy Jekyll mode from
-the root of `main`. It has been **turned off**, along with the `static.yml` workflow that
-was meant to feed it.
+O repositório costumava publicar um site via Pages, gerado pelo modo Jekyll legado do
+GitHub a partir da raiz da `main`. Isso foi **desligado**, junto com o workflow
+`static.yml` que o alimentava.
 
-Both were dropped for the same reason: neither did anything worth keeping.
+Os dois foram removidos pelo mesmo motivo: nenhum dos dois fazia algo que valesse a pena
+manter.
 
-- `static.yml` failed on **every** push. `upload-pages-artifact@v2` depends on the
-  deprecated `upload-artifact@v3`, which GitHub now fails automatically.
-- The site did not depend on that workflow anyway — the legacy build served it — and all
-  it rendered was the README, which GitHub already displays better.
-- Nothing in the repository linked to the Pages URL.
-- It served the whole repository as static files, which is a distribution surface with no
-  purpose behind it.
+- O `static.yml` falhava em **toda** push. O `upload-pages-artifact@v2` depende do
+  depreciado `upload-artifact@v3`, que o GitHub agora recusa automaticamente.
+- O site nem dependia desse workflow — a build legada é quem o servia — e tudo que ele
+  renderizava era o README, que o próprio GitHub já exibe melhor.
+- Nada no repositório apontava para a URL do Pages.
+- Ele servia o repositório inteiro como arquivos estáticos, o que é uma superfície de
+  distribuição sem propósito por trás.
 
-Publishing the test report through Pages would have needed a different design regardless:
-`cypress/report/` is gitignored, so no report is ever committed. The `main.yml` workflow
-already uploads the mochawesome report as a run artifact, which covers that need.
+Publicar o relatório de teste via Pages precisaria de um desenho diferente de qualquer
+forma: `cypress/report/` está no `.gitignore`, então nenhum relatório é versionado. O
+workflow `main.yml` já publica o relatório do mochawesome como artefato da execução, o
+que cobre essa necessidade.
 
-To bring a site back, re-enable Pages under **Settings → Pages** and pick a source.
+Para trazer um site de volta, reative o Pages em **Settings → Pages** e escolha uma
+fonte.
 
-## Troubleshooting
+## Solução de problemas
 
-### `bad option: --no-sandbox` when running from the VS Code terminal
+### `bad option: --no-sandbox` ao rodar pelo terminal do VS Code
 
-The integrated VS Code terminal sets `ELECTRON_RUN_AS_NODE=1`, which makes the Cypress
-binary start as plain Node and reject the Electron flags. Fix:
+O terminal integrado do VS Code define `ELECTRON_RUN_AS_NODE=1`, o que faz o binário do
+Cypress subir como Node puro e rejeitar as flags do Electron. Correção:
 
 ```bash
 unset ELECTRON_RUN_AS_NODE && npx cypress run
 ```
 
-Or run from an external terminal, where the variable is not set. CI is unaffected.
+Ou rode a partir de um terminal externo, onde a variável não está definida. O CI não é
+afetado.
 
-## What `.gitignore` covers
+## O que o `.gitignore` cobre
 
 ```
 # Dependencies
@@ -282,5 +294,5 @@ screenshots
 .DS_Store
 ```
 
-Dependencies, reports, videos and screenshots stay out of version control. Note that
-video recording has been **off by default** since Cypress 13.
+Dependências, relatórios, vídeos e screenshots ficam fora do controle de versão. Vale
+notar que a gravação de vídeo vem **desabilitada por padrão** desde o Cypress 13.

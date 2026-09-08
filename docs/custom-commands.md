@@ -1,25 +1,26 @@
-# Custom commands
+# Comandos customizados
 
-The commands live under `cypress/support/`, one file per API resource, registered
-globally by [cypress/support/e2e.js](../cypress/support/e2e.js) — which makes them
-available as `cy.<command>()` in any spec.
+Os comandos vivem em `cypress/support/`, um arquivo por recurso da API, registrados
+globalmente por [cypress/support/e2e.js](../cypress/support/e2e.js) — o que os deixa
+disponíveis como `cy.<comando>()` em qualquer spec.
 
-| File | Resource |
+| Arquivo | Recurso |
 | --- | --- |
 | [products_commands.js](../cypress/support/products_commands.js) | `/products` |
 | [carts_commands.js](../cypress/support/carts_commands.js) | `/carts` |
 | [users_commands.js](../cypress/support/users_commands.js) | `/users` |
 | [auth_commands.js](../cypress/support/auth_commands.js) | `/auth/login` |
 
-Every command yields whatever `cy.request()` yields: a response object carrying `status`,
-`body`, `headers` and `duration`. Assertions happen in the spec's `.then()`.
+Todo comando devolve exatamente o que `cy.request()` devolve: um objeto de resposta com
+`status`, `body`, `headers` e `duration`. As asserções ficam no `.then()` da spec.
 
-All 27 commands are typed in [cypress/support/index.d.ts](../cypress/support/index.d.ts),
-so editors autocomplete them and show their parameters.
+Os 27 comandos estão tipados em
+[cypress/support/index.d.ts](../cypress/support/index.d.ts), então os editores dão
+autocomplete e mostram os parâmetros.
 
-## Products
+## Produtos
 
-| Command | Request |
+| Comando | Requisição |
 | --- | --- |
 | `cy.getAllProducts()` | `GET /products` |
 | `cy.getSingleProduct(id)` | `GET /products/{id}` |
@@ -38,12 +39,12 @@ cy.getSingleProduct(9).then(response => {
 })
 ```
 
-`getSpecificCategory` runs the name through `encodeURIComponent`, which is what makes
-categories containing a space and an apostrophe — such as `men's clothing` — testable.
+`getSpecificCategory` passa o nome por `encodeURIComponent`, o que é o que torna
+testável uma categoria com espaço e apóstrofo, como `men's clothing`.
 
-## Carts
+## Carrinhos
 
-| Command | Request |
+| Comando | Requisição |
 | --- | --- |
 | `cy.getAllCarts()` | `GET /carts` |
 | `cy.getSingleCart(id)` | `GET /carts/{id}` |
@@ -55,9 +56,9 @@ categories containing a space and an apostrophe — such as `men's clothing` —
 | `cy.putUpdateCart(id, jsonBody)` | `PUT /carts/{id}` |
 | `cy.deleteCart(id)` | `DELETE /carts/{id}` |
 
-## Users
+## Usuários
 
-| Command | Request |
+| Comando | Requisição |
 | --- | --- |
 | `cy.getAllUsers()` | `GET /users` |
 | `cy.getSingleUser(id)` | `GET /users/{id}` |
@@ -67,33 +68,33 @@ categories containing a space and an apostrophe — such as `men's clothing` —
 | `cy.putUpdateUser(id, jsonBody)` | `PUT /users/{id}` |
 | `cy.deleteUser(id)` | `DELETE /users/{id}` |
 
-## Authentication
+## Autenticação
 
-| Command | Request |
+| Comando | Requisição |
 | --- | --- |
 | `cy.postLogin(jsonBody)` | `POST /auth/login` |
 
-The only command carrying `failOnStatusCode: false`, so the negative scenarios (`401` for
-bad credentials, `400` for a malformed payload) reach the `.then()` instead of making
-Cypress fail on its own.
+O único comando que carrega `failOnStatusCode: false`, para que os cenários negativos
+(`401` para credencial errada, `400` para payload malformado) cheguem ao `.then()` em vez
+de fazer o Cypress falhar sozinho.
 
 ```js
-cy.postLogin({ username: 'johnd', password: 'wrong' }).then(response => {
+cy.postLogin({ username: 'johnd', password: 'errada' }).then(response => {
   expect(response.status).to.equal(401)
 })
 ```
 
-## Adding a new command
+## Adicionando um novo comando
 
-1. Declare it in the matching resource file with `Cypress.Commands.add`. A new resource
-   gets a new file, imported from `cypress/support/e2e.js`.
-2. Use a relative path (`/products/...`) so the `baseUrl` applies.
-3. Keep assertions out of the command — it only carries the response.
-4. If the API may answer with an error (4xx/5xx) and the test expects that, add
+1. Declare-o no arquivo do recurso correspondente com `Cypress.Commands.add`. Um recurso
+   novo ganha um arquivo novo, importado em `cypress/support/e2e.js`.
+2. Use um caminho relativo (`/products/...`) para que a `baseUrl` seja respeitada.
+3. Não coloque asserção no comando — ele só carrega a resposta.
+4. Se a API puder responder com erro (4xx/5xx) e o teste esperar isso, adicione
    `failOnStatusCode: false`.
-5. Write commands take the payload as a parameter; never hardcode a body inside the
-   command.
-6. Declare the command in `cypress/support/index.d.ts` as well.
+5. Comandos de escrita recebem o payload como parâmetro; nunca deixe o corpo fixo dentro
+   do comando.
+6. Declare o comando também em `cypress/support/index.d.ts`.
 
 ```js
 Cypress.Commands.add('putUpdateProduct', (productId, jsonBody) => {

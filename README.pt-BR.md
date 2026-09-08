@@ -184,15 +184,15 @@ customizado, e os dados ficam em fixtures.
 
 ## Documentação
 
-A documentação completa está em [docs/](docs/README.md), **em inglês**:
+A documentação completa está em [docs/](docs/README.md):
 
 | Documento | Conteúdo |
 | --- | --- |
-| [Architecture](docs/architecture.md) | Estrutura, configuração e decisões técnicas |
-| [Custom commands](docs/custom-commands.md) | Referência de todos os `cy.*` do projeto |
-| [Test cases](docs/test-cases.md) | O que cada teste valida e as peculiaridades da API |
-| [Running and CI](docs/running-and-ci.md) | Execução local, relatórios e GitHub Actions |
-| [Known issues](docs/known-issues.md) | Pontos em aberto mapeados |
+| [Arquitetura](docs/architecture.md) | Estrutura, configuração e decisões técnicas |
+| [Comandos customizados](docs/custom-commands.md) | Referência de todos os `cy.*` do projeto |
+| [Casos de teste](docs/test-cases.md) | O que cada teste valida e as peculiaridades da API |
+| [Execução e CI](docs/running-and-ci.md) | Execução local, relatórios e GitHub Actions |
+| [Estado conhecido](docs/known-issues.md) | Pontos em aberto mapeados |
 
 ## Licença
 

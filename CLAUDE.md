@@ -134,8 +134,10 @@ Os mais relevantes ao mexer no código:
   intervalo. Reforce-o se a API for corrigida.
 - As validações de contrato são manuais (`to.have.all.keys` + checagem de tipo); não há
   biblioteca de schema no projeto.
-- `npm audit` reporta 8 alertas residuais, todos transitivos do `mocha`/`mochawesome`. O
-  `fixAvailable` sugere **downgrade** (mochawesome 1.5), o que seria pior — não aplique.
+- `npm audit` reporta 8 alertas residuais (0 críticos), todos transitivos do
+  `mocha`/`mochawesome`. O `fixAvailable --force` propõe **upgrades com breaking change**
+  (`mocha@12`, `mochawesome@8`), não um downgrade — risco de regressão maior que os
+  alertas em si. Não aplique.
 - Fixtures ociosas de propósito: `all_electronics_products.json` e
   `all_jewelery_products.json` — o teste de categoria valida todo item retornado em vez de
   comparar com lista fixa.

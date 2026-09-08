@@ -182,7 +182,7 @@ command, and the data lives in fixtures.
 
 ## Documentation
 
-Full documentation lives in [docs/](docs/README.md):
+Full documentation lives in [docs/](docs/README.md), **in Portuguese**:
 
 | Document | Contents |
 | --- | --- |

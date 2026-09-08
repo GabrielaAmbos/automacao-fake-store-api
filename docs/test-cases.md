@@ -1,170 +1,168 @@
-# Test cases
+# Casos de teste
 
-**40 tests** across four specs, one per API resource.
+**40 testes** em quatro specs, uma por recurso da API.
 
-| Spec | Resource | Tests |
+| Spec | Recurso | Testes |
 | --- | --- | --- |
 | [products.cy.js](../cypress/e2e/products/products.cy.js) | `/products` | 15 |
 | [carts.cy.js](../cypress/e2e/carts/carts.cy.js) | `/carts` | 12 |
 | [users.cy.js](../cypress/e2e/users/users.cy.js) | `/users` | 9 |
 | [auth.cy.js](../cypress/e2e/auth/auth.cy.js) | `/auth/login` | 4 |
 
-Each spec groups its tests into inner `context` blocks — **Leitura** (read),
-**Categorias** (categories) and **Escrita** (write) — separating what queries from what
-changes.
+Cada spec agrupa os testes em blocos `context` internos — **Leitura**, **Categorias** e
+**Escrita** — separando o que consulta do que altera.
 
-> Test titles are written in Portuguese in the code, and are quoted verbatim below so
-> that the tables line up with the runner output.
+> Os títulos dos testes já estão em português no código e são citados literalmente
+> abaixo, para que as tabelas batam com a saída do runner.
 
-## Products — 15 tests
+## Produtos — 15 testes
 
-### Leitura (read)
+### Leitura
 
-| Test | Endpoint | Verifies |
+| Teste | Endpoint | Verifica |
 | --- | --- | --- |
-| Buscar todos os produtos | `GET /products` | `200`, array of 20 items |
-| Validar o contrato de um produto da listagem | `GET /products` | Object keys and types, including `rating.rate` and `rating.count` |
-| Buscar por um produto | `GET /products/9` | Compares `title`, `description`, `price` and `category` against the fixture |
-| Buscar por produto inexistente | `GET /products/-1` | `200` with an empty body (`''`) |
-| Limitar a quantidade de produtos | `GET /products?limit=3` | Returns exactly 3 items |
-| Ordenar de forma crescente | `GET /products?sort=asc` | Ids in ascending order |
-| Ordenar de forma decrescente | `GET /products?sort=desc` | Ids in descending order |
+| Buscar todos os produtos | `GET /products` | `200`, array com 20 itens |
+| Validar o contrato de um produto da listagem | `GET /products` | Chaves e tipos do objeto, incluindo `rating.rate` e `rating.count` |
+| Buscar por um produto | `GET /products/9` | Compara `title`, `description`, `price` e `category` com a fixture |
+| Buscar por produto inexistente | `GET /products/-1` | `200` com corpo vazio (`''`) |
+| Limitar a quantidade de produtos | `GET /products?limit=3` | Retorna exatamente 3 itens |
+| Ordenar de forma crescente | `GET /products?sort=asc` | Ids em ordem crescente |
+| Ordenar de forma decrescente | `GET /products?sort=desc` | Ids em ordem decrescente |
 
-### Categorias (categories)
+### Categorias
 
-| Test | Endpoint | Verifies |
+| Teste | Endpoint | Verifica |
 | --- | --- | --- |
-| Buscar todas as categorias | `GET /products/categories` | All 4 categories, **regardless of order** |
-| Buscar por uma categoria | `GET /products/category/electronics` | Every returned item has `category === 'electronics'` |
-| Buscar por uma categoria com espaço no nome | `GET /products/category/men's clothing` | URL encoding works |
-| Buscar por uma categoria inexistente | `GET /products/category/noneC` | `200` with an empty array |
+| Buscar todas as categorias | `GET /products/categories` | As 4 categorias, **independente da ordem** |
+| Buscar por uma categoria | `GET /products/category/electronics` | Todo item retornado tem `category === 'electronics'` |
+| Buscar por uma categoria com espaço no nome | `GET /products/category/men's clothing` | A codificação da URL funciona |
+| Buscar por uma categoria inexistente | `GET /products/category/noneC` | `200` com array vazio |
 
-### Escrita (write)
+### Escrita
 
-| Test | Endpoint | Verifies |
+| Teste | Endpoint | Verifica |
 | --- | --- | --- |
-| Cadastrar um novo produto | `POST /products` | `201`, generated id, fields echoed back |
-| Atualizar um produto por completo | `PUT /products/7` | `200`, id preserved, fields updated |
-| Atualizar apenas o preço | `PATCH /products/7` | `200`, only the price changes |
-| Excluir um produto | `DELETE /products/6` | `200`, the response carries the deleted product |
+| Cadastrar um novo produto | `POST /products` | `201`, id gerado, campos ecoados de volta |
+| Atualizar um produto por completo | `PUT /products/7` | `200`, id preservado, campos atualizados |
+| Atualizar apenas o preço | `PATCH /products/7` | `200`, só o preço muda |
+| Excluir um produto | `DELETE /products/6` | `200`, a resposta traz o produto excluído |
 
-## Carts — 12 tests
+## Carrinhos — 12 testes
 
-### Leitura (read)
+### Leitura
 
-| Test | Endpoint | Verifies |
+| Teste | Endpoint | Verifica |
 | --- | --- | --- |
-| Buscar todos os carrinhos | `GET /carts` | `200`, array of 7 items |
-| Validar o contrato de um carrinho | `GET /carts` | `id`, `userId`, `date` and each `products` entry with `productId`/`quantity` |
-| Buscar por um carrinho | `GET /carts/1` | `200`, correct id, product list populated |
-| Buscar por carrinho inexistente | `GET /carts/999` | `200` with a **`null`** body |
-| Buscar os carrinhos de um usuário | `GET /carts/user/1` | Every cart has `userId === 1` |
-| Buscar os carrinhos de um usuário sem compras | `GET /carts/user/999` | `200` with an empty array |
-| Limitar a quantidade de carrinhos | `GET /carts?limit=2` | Returns 2 items |
-| Ordenar de forma decrescente | `GET /carts?sort=desc` | Ids in descending order |
-| Buscar por intervalo de datas | `GET /carts?startdate=&enddate=` | `200` and an array (see the caveat below) |
+| Buscar todos os carrinhos | `GET /carts` | `200`, array com 7 itens |
+| Validar o contrato de um carrinho | `GET /carts` | `id`, `userId`, `date` e cada item de `products` com `productId`/`quantity` |
+| Buscar por um carrinho | `GET /carts/1` | `200`, id correto, lista de produtos preenchida |
+| Buscar por carrinho inexistente | `GET /carts/999` | `200` com corpo **`null`** |
+| Buscar os carrinhos de um usuário | `GET /carts/user/1` | Todo carrinho tem `userId === 1` |
+| Buscar os carrinhos de um usuário sem compras | `GET /carts/user/999` | `200` com array vazio |
+| Limitar a quantidade de carrinhos | `GET /carts?limit=2` | Retorna 2 itens |
+| Ordenar de forma decrescente | `GET /carts?sort=desc` | Ids em ordem decrescente |
+| Buscar por intervalo de datas | `GET /carts?startdate=&enddate=` | `200` e um array (ver ressalva abaixo) |
 
-### Escrita (write)
+### Escrita
 
-| Test | Endpoint | Verifies |
+| Teste | Endpoint | Verifica |
 | --- | --- | --- |
-| Cadastrar um novo carrinho | `POST /carts` | `201`, generated id, `products` echoed back |
-| Atualizar um carrinho | `PUT /carts/3` | `200`, id preserved |
-| Excluir um carrinho | `DELETE /carts/2` | `200`, the response carries the deleted cart |
+| Cadastrar um novo carrinho | `POST /carts` | `201`, id gerado, `products` ecoado de volta |
+| Atualizar um carrinho | `PUT /carts/3` | `200`, id preservado |
+| Excluir um carrinho | `DELETE /carts/2` | `200`, a resposta traz o carrinho excluído |
 
-> **Caveat on the date filter:** the test checks status and type only, because the API
-> ignores the range — `startdate=2019-12-10&enddate=2020-10-10` returns all 7 carts,
-> including the ones outside it. Asserting the filtering would make the test fail against
-> real behaviour.
+> **Ressalva sobre o filtro de datas:** o teste checa apenas status e tipo, porque a API
+> ignora o intervalo — `startdate=2019-12-10&enddate=2020-10-10` devolve os 7 carrinhos,
+> inclusive os que estão fora dele. Asserir a filtragem faria o teste falhar contra o
+> comportamento real.
 
-## Users — 9 tests
+## Usuários — 9 testes
 
-### Leitura (read)
+### Leitura
 
-| Test | Endpoint | Verifies |
+| Teste | Endpoint | Verifica |
 | --- | --- | --- |
-| Buscar todos os usuários | `GET /users` | `200`, array of 10 items |
-| Validar o contrato de um usuário | `GET /users` | Nested `name.firstname/lastname`, `address` and `address.geolocation` |
-| Buscar por um usuário | `GET /users/1` | `200`, correct id |
-| Buscar por usuário inexistente | `GET /users/999` | `200` with a **`null`** body |
-| Limitar a quantidade de usuários | `GET /users?limit=2` | Returns 2 items |
-| Ordenar de forma decrescente | `GET /users?sort=desc` | Ids in descending order |
+| Buscar todos os usuários | `GET /users` | `200`, array com 10 itens |
+| Validar o contrato de um usuário | `GET /users` | `name.firstname/lastname`, `address` e `address.geolocation` aninhados |
+| Buscar por um usuário | `GET /users/1` | `200`, id correto |
+| Buscar por usuário inexistente | `GET /users/999` | `200` com corpo **`null`** |
+| Limitar a quantidade de usuários | `GET /users?limit=2` | Retorna 2 itens |
+| Ordenar de forma decrescente | `GET /users?sort=desc` | Ids em ordem decrescente |
 
-### Escrita (write)
+### Escrita
 
-| Test | Endpoint | Verifies |
+| Teste | Endpoint | Verifica |
 | --- | --- | --- |
-| Cadastrar um novo usuário | `POST /users` | `201` — the response carries **only** `{ id }` |
-| Atualizar um usuário | `PUT /users/1` | `200`, fields echoed back (no `id` in the response) |
-| Excluir um usuário | `DELETE /users/2` | `200`, the response carries the deleted user |
+| Cadastrar um novo usuário | `POST /users` | `201` — a resposta traz **só** `{ id }` |
+| Atualizar um usuário | `PUT /users/1` | `200`, campos ecoados de volta (sem `id` na resposta) |
+| Excluir um usuário | `DELETE /users/2` | `200`, a resposta traz o usuário excluído |
 
-## Authentication — 4 tests
+## Autenticação — 4 testes
 
-| Test | Scenario | Verifies |
+| Teste | Cenário | Verifica |
 | --- | --- | --- |
-| Autenticar com credenciais válidas | `johnd` / correct password | `201` and a token in JWT shape (`x.y.z`) |
-| Rejeitar credenciais inválidas | nonexistent user | `401`, body contains `incorrect` |
-| Rejeitar login com a senha errada | valid user, wrong password | `401` |
-| Rejeitar login sem username e password | body `{}` | `400`, body contains `not provided` |
+| Autenticar com credenciais válidas | `johnd` / senha correta | `201` e um token no formato JWT (`x.y.z`) |
+| Rejeitar credenciais inválidas | usuário inexistente | `401`, corpo contém `incorrect` |
+| Rejeitar login com a senha errada | usuário válido, senha errada | `401` |
+| Rejeitar login sem username e password | corpo `{}` | `400`, corpo contém `not provided` |
 
-The `cy.postLogin()` command uses `failOnStatusCode: false`; without it Cypress would
-fail on its own upon receiving `401`/`400` — which is exactly what these scenarios
-expect.
+O comando `cy.postLogin()` usa `failOnStatusCode: false`; sem isso o Cypress falharia
+sozinho ao receber `401`/`400` — que é exatamente o que esses cenários esperam.
 
-## API behaviours the tests pin down
+## Comportamentos da API que os testes fixam
 
-The suite doubles as a record of the Fake Store API's quirks, found by probing the
-endpoints before writing any assertion:
+A suíte também funciona como registro das particularidades da Fake Store API,
+descobertas sondando os endpoints antes de escrever qualquer asserção:
 
-| Situation | Response |
+| Situação | Resposta |
 | --- | --- |
-| `GET /products/{nonexistent id}` | `200` with an **empty** body (`''`) |
-| `GET /carts/{nonexistent id}` | `200` with a **`null`** body |
-| `GET /users/{nonexistent id}` | `200` with a **`null`** body |
-| `GET /products/category/{nonexistent}` | `200` with an **empty array** |
-| `POST` on any resource | **`201`** |
+| `GET /products/{id inexistente}` | `200` com corpo **vazio** (`''`) |
+| `GET /carts/{id inexistente}` | `200` com corpo **`null`** |
+| `GET /users/{id inexistente}` | `200` com corpo **`null`** |
+| `GET /products/category/{inexistente}` | `200` com **array vazio** |
+| `POST` em qualquer recurso | **`201`** |
 | `PUT` / `PATCH` / `DELETE` | **`200`** |
-| `DELETE` | Returns the deleted resource, not an empty body |
-| `POST /users` | Returns only `{ id }`, unlike the other POSTs |
-| `POST /auth/login` on error | `401` / `400` with a **plain-text** body, not JSON |
+| `DELETE` | Retorna o recurso excluído, não um corpo vazio |
+| `POST /users` | Retorna só `{ id }`, diferente dos outros POSTs |
+| `POST /auth/login` com erro | `401` / `400` com corpo em **texto puro**, não JSON |
 
-No `4xx` is ever returned for a nonexistent resource on `GET` — only authentication uses
-real error codes.
+Nenhum `4xx` é retornado para um recurso inexistente em `GET` — só a autenticação usa
+códigos de erro de verdade.
 
 ## Fixtures
 
-| File | Contents | Used by |
+| Arquivo | Conteúdo | Usado por |
 | --- | --- | --- |
-| `hard_drive_portable_2t.json` | A complete product (id 9) | Buscar por um produto |
-| `all_categories.json` | The 4 named categories | Buscar todas as categorias |
-| `new_product.json` | Product payload for `POST`/`PUT` | Product write tests |
-| `new_cart.json` | Cart payload | Cart write tests |
-| `new_user.json` | User payload | User write tests |
-| `credentials.json` | Valid and invalid credentials | Every authentication test |
-| `all_electronics_products.json` | Array of electronics products | **None** |
-| `all_jewelery_products.json` | Array of jewelery products | **None** |
+| `hard_drive_portable_2t.json` | Um produto completo (id 9) | Buscar por um produto |
+| `all_categories.json` | As 4 categorias nomeadas | Buscar todas as categorias |
+| `new_product.json` | Payload de produto para `POST`/`PUT` | Testes de escrita de produto |
+| `new_cart.json` | Payload de carrinho | Testes de escrita de carrinho |
+| `new_user.json` | Payload de usuário | Testes de escrita de usuário |
+| `credentials.json` | Credenciais válidas e inválidas | Todos os testes de autenticação |
+| `all_electronics_products.json` | Array de produtos de eletrônicos | **Nenhum** |
+| `all_jewelery_products.json` | Array de produtos de joalheria | **Nenhum** |
 
-The last two stay idle on purpose: the category test asserts that **every** returned item
-belongs to the requested category rather than comparing against a fixed list. That does
-not break when the API's catalogue changes.
+Os dois últimos ficam ociosos de propósito: o teste de categoria valida que **todo** item
+retornado pertence à categoria pedida, em vez de comparar com uma lista fixa. Isso não
+quebra quando o catálogo da API muda.
 
-> The credentials in `credentials.json` are the public demo ones published by the Fake
-> Store API itself — they are not secrets.
+> As credenciais em `credentials.json` são as credenciais públicas de demonstração
+> publicadas pela própria Fake Store API — não são segredos.
 
 ## Tags
 
-| Tag | Scope | Tests |
+| Tag | Escopo | Testes |
 | --- | --- | --- |
-| `@regression` | Every spec | 40 |
-| `@products` | Products spec | 15 |
-| `@carts` | Carts spec | 12 |
-| `@users` | Users spec | 9 |
-| `@smoke` | One key case per resource | 7 |
-| `@auth` | Authentication spec | 4 |
-| `@activities` | Products spec (inherited from the original project) | 15 |
+| `@regression` | Toda spec | 40 |
+| `@products` | Spec de produtos | 15 |
+| `@carts` | Spec de carrinhos | 12 |
+| `@users` | Spec de usuários | 9 |
+| `@smoke` | Um caso principal por recurso | 7 |
+| `@auth` | Spec de autenticação | 4 |
+| `@activities` | Spec de produtos (herdada do projeto original) | 15 |
 
 ```bash
 npx cypress run --expose grepTags=@smoke
 ```
 
-Syntax details in [Running and CI](running-and-ci.md#filtering-tests-by-tag).
+Detalhes de sintaxe em [Execução e CI](running-and-ci.md#filtrando-testes-por-tag).
